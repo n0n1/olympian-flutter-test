@@ -13,7 +13,7 @@ import '../viewmodels/settings_viewmodel.dart';
 import 'restart_app.dart';
 
 class SettingsDialog extends StatefulWidget {
-  SettingsDialog({Key? key}) : super(key: key);
+  const SettingsDialog({Key? key}) : super(key: key);
 
   @override
   State<SettingsDialog> createState() => _SettingsDialogState();
@@ -117,7 +117,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               ),
               Stack(
                 children: [
-                  if(kDebugMode)
+                  if (kDebugMode)
                     GestureDetector(
                       onTap: () async {
                         showDialog(
@@ -148,7 +148,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         );
                       },
                       child: Image.asset('assets/images/green_btn_reset.png'),
-                  ),
+                    ),
                   Text(
                     'Version: ${_packageInfo.version}, Build number: ${_packageInfo.buildNumber}',
                     style: ThemeText.info,

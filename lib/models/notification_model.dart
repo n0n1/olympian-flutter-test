@@ -12,12 +12,11 @@ class NotificationDataKeys {
 class NotificationModel {
   final int addCoins;
 
-  NotificationModel({
+  const NotificationModel({
     this.addCoins = 0,
   });
 
   factory NotificationModel.fromJson(Map<dynamic, dynamic> json) {
-
     return NotificationModel(
       addCoins: int.parse(json['add_coins']),
     );
