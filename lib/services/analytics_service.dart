@@ -1,8 +1,8 @@
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:appmetrica_plugin/appmetrica_plugin.dart';
 import 'package:amplitude_flutter/amplitude.dart';
+import 'package:appmetrica_plugin/appmetrica_plugin.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 
@@ -13,7 +13,7 @@ import 'db_service.dart';
 enum AnalyticsEvents {
   sessionFirstTime,
   sessionStart,
-  Activation,
+  activation,
   onCompleteNextAction,
   onPlayTap,
   onShowAdsWorking,

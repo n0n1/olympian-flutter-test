@@ -85,7 +85,7 @@ class GameViewModel with ChangeNotifier {
     if (isComplete) {
       if (getLevelIndex() == 1 && !isFirstLevelComplete) {
         isFirstLevelComplete = true;
-        _analytics.fireEvent(AnalyticsEvents.Activation);
+        _analytics.fireEvent(AnalyticsEvents.activation);
       }
 
       activeLevel.state = LevelState.success;
