@@ -4,7 +4,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../services/ad_service.dart';
 import '../styles.dart';
 
 class AdvTimeScreen extends StatefulWidget {
@@ -17,12 +16,11 @@ class AdvTimeScreen extends StatefulWidget {
 class _AdvTimeScreenState extends State<AdvTimeScreen> {
   late Timer _timer;
 
-
   @override
   void initState() {
-    final AdService ad = AdService();
+    // final AdService ad = AdService();
     _timer = Timer(const Duration(milliseconds: 1500), () async {
-      ad.showFullScreenBanner();
+      // ad.showFullScreenBanner();
       await Future.delayed(const Duration(milliseconds: 500));
       Navigator.pop(context);
       _timer.cancel();
@@ -47,7 +45,9 @@ class _AdvTimeScreenState extends State<AdvTimeScreen> {
         ),
         child: Column(
           children: [
-            const SizedBox(height: 90,),
+            const SizedBox(
+              height: 90,
+            ),
             const Expanded(
               flex: 1,
               child: Text(
@@ -74,4 +74,3 @@ class _AdvTimeScreenState extends State<AdvTimeScreen> {
     _timer.cancel();
   }
 }
-

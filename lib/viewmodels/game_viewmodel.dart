@@ -1,22 +1,22 @@
 import 'dart:math';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
-import '../models/notification_model.dart';
-import '../screens/adv_time_screen.dart';
-import '../services/ad_service.dart';
-import '../services/analytics_service.dart';
 
-import '../widgets/game_complete_dialog.dart';
 import '../models/level_model.dart';
+import '../models/notification_model.dart';
 import '../models/word_model.dart';
+import '../screens/adv_time_screen.dart';
+import '../services/analytics_service.dart';
 import '../services/audio_service.dart';
+import '../services/config_service.dart';
 import '../services/db_service.dart';
 import '../utils/format.dart';
+import '../widgets/game_complete_dialog.dart';
 import '../widgets/level_complete_dialog.dart';
 import '../widgets/shop_dialog.dart';
-import '../services/config_service.dart';
 import '../widgets/wrong_answer_dialog.dart';
 
 // ignore_for_file: constant_identifier_names
@@ -25,7 +25,7 @@ const int maxFailedLoadAttempts = 3;
 
 class GameViewModel with ChangeNotifier {
   final DbService _db = DbService();
-  final AdService _ad = AdService();
+  // final AdService _ad = AdService();
   final AudioService _audio = AudioService();
   final ConfigService _conf = ConfigService();
   final AnalyticsService _analytics = AnalyticsService();
@@ -209,7 +209,10 @@ class GameViewModel with ChangeNotifier {
         }
 
         // Монеты за прохождение всех слов в столбце
-        final isRowComplete = depthWords.where((element) => element.state == WordState.correct).length == depthWords.length;
+        final isRowComplete = depthWords
+                .where((element) => element.state == WordState.correct)
+                .length ==
+            depthWords.length;
 
         if (isRowComplete) {
           coins += _conf.appConfig.entireColumnsCoins;
@@ -269,12 +272,13 @@ class GameViewModel with ChangeNotifier {
     return isCorrect;
   }
 
-  showBanner({ required BuildContext context }) {
+  showBanner({required BuildContext context}) {
     // Показ баннера
     if (getLevelIndex() > 1) {
       Navigator.of(context).push(
         PageRouteBuilder(
-          pageBuilder: (context, animation1, animation2) => const AdvTimeScreen(),
+          pageBuilder: (context, animation1, animation2) =>
+              const AdvTimeScreen(),
           transitionDuration: Duration.zero,
           reverseTransitionDuration: Duration.zero,
         ),
@@ -284,7 +288,7 @@ class GameViewModel with ChangeNotifier {
 
   void turnOffAdv() {
     _db.saveAdvSetting();
-    _ad.turnOffAdd();
+    // _ad.turnOffAdd();
   }
 
   bool getAdvSettings() {
@@ -325,7 +329,8 @@ class GameViewModel with ChangeNotifier {
     }
     word.state = focus ? WordState.input : WordState.idle;
     try {
-      focusedWord = activeLevel.data.firstWhere((w) => w.state == WordState.input);
+      focusedWord =
+          activeLevel.data.firstWhere((w) => w.state == WordState.input);
     } catch (e) {
       focusedWord = null;
     }
@@ -551,28 +556,29 @@ class GameViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> canShowAd() {
-    return _ad.canShowAd();
+  Future<bool> canShowAd() async {
+    // return _ad.canShowAd();
+    return false;
   }
 
   showAd(Function onDone) async {
-    _analytics.fireEventWithMap(AnalyticsEvents.onShowAdsWorking, {
-      'level_id': activeLevel.id,
-      'level': getLevelIndex(),
-      'word': focusedWord?.word ?? '',
-    });
-    _ad.show(() {
-      onDone();
-      buyPointsComplete(_conf.appConfig.advViewCoins);
-      _analytics.fireEventWithMap(
-        AnalyticsEvents.onAdsWatched,
-        {
-          'coins': coins,
-          'level_id': activeLevel.id,
-          'level': getLevelIndex(),
-        },
-      );
-    });
+    // _analytics.fireEventWithMap(AnalyticsEvents.onShowAdsWorking, {
+    //   'level_id': activeLevel.id,
+    //   'level': getLevelIndex(),
+    //   'word': focusedWord?.word ?? '',
+    // });
+    // _ad.show(() {
+    //   onDone();
+    //   buyPointsComplete(_conf.appConfig.advViewCoins);
+    //   _analytics.fireEventWithMap(
+    //     AnalyticsEvents.onAdsWatched,
+    //     {
+    //       'coins': coins,
+    //       'level_id': activeLevel.id,
+    //       'level': getLevelIndex(),
+    //     },
+    //   );
+    // });
   }
 
   clearActiveWord() {
@@ -644,7 +650,8 @@ class GameViewModel with ChangeNotifier {
   }
 
   _cacheImages() {
-    for (final lvl in _levels.where((element) => element.state == LevelState.available)) {
+    for (final lvl
+        in _levels.where((element) => element.state == LevelState.available)) {
       final wordsWithImage =
           lvl.data.where((element) => element.image.isNotEmpty);
       for (final word in wordsWithImage) {

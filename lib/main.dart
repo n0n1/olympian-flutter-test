@@ -1,27 +1,27 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'config/config.dart';
-import 'viewmodels/payment_viewmodel.dart';
-import 'package:provider/provider.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
+import 'package:provider/provider.dart';
 
+import 'config/config.dart';
 import 'screens/entry_screen.dart';
 import 'services/analytics_service.dart';
 import 'services/audio_service.dart';
+import 'services/config_service.dart';
 import 'services/db_service.dart';
-import 'services/ad_service.dart';
+// import 'services/ad_service.dart';
 
 import 'viewmodels/game_viewmodel.dart';
+import 'viewmodels/payment_viewmodel.dart';
 import 'viewmodels/promocode_viewmodel.dart';
 import 'viewmodels/settings_viewmodel.dart';
 import 'widgets/restart_app.dart';
-import 'services/config_service.dart';
 
 setupInit() async {
   await Hive.initFlutter();
@@ -44,8 +44,8 @@ setupInit() async {
   final audio = AudioService();
   await audio.init();
 
-  final ad = AdService();
-  await ad.init();
+  // final ad = AdService();
+  // await ad.init();
 
   final analytics = AnalyticsService();
   await analytics.init();
