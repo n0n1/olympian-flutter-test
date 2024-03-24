@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../services/analytics_service.dart';
 import 'package:provider/provider.dart';
 
+import '../services/analytics_service.dart';
 import '../styles.dart';
 import '../viewmodels/game_viewmodel.dart';
 import 'image_button.dart';
@@ -94,14 +94,14 @@ class ScoreBar extends StatelessWidget {
               child: Image.asset('assets/images/score.png', width: 160),
             ),
             Positioned(
+              top: 12,
+              right: 70,
+              left: 30,
               child: Text(
                 coins.toString(),
                 textAlign: TextAlign.center,
                 style: ThemeText.pointsText,
               ),
-              top: 12,
-              right: 70,
-              left: 30,
             )
           ],
         ),
