@@ -47,18 +47,25 @@ class YouKassaContent extends StatelessWidget {
                     GestureDetector(
                       onTap: () {
                         final params = {
-                          'level_id': context.read<GameViewModel>().activeLevel.id,
-                          'level': context.read<GameViewModel>().getLevelIndex() as int,
-                          'word': context.read<GameViewModel>().focusedWord?.word ?? '',
+                          'level_id':
+                              context.read<GameViewModel>().activeLevel.id,
+                          'level':
+                              context.read<GameViewModel>().getLevelIndex(),
+                          'word':
+                              context.read<GameViewModel>().focusedWord?.word ??
+                                  '',
                         };
 
-                        analytics.fireEventWithMap(AnalyticsEvents.advOff, params);
+                        analytics.fireEventWithMap(
+                            AnalyticsEvents.advOff, params);
 
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             fullscreenDialog: true,
-                            builder: (context) => YouKassaPayment(product: availableProducts.firstWhere((e) => e.id == 'adv_off')),
+                            builder: (context) => YouKassaPayment(
+                                product: availableProducts
+                                    .firstWhere((e) => e.id == 'adv_off')),
                           ),
                         );
                       },
@@ -96,11 +103,11 @@ class YouKassaContent extends StatelessWidget {
       onTap: () {
         final params = {
           'level_id': context.read<GameViewModel>().activeLevel.id,
-          'level': context.read<GameViewModel>().getLevelIndex() as int,
+          'level': context.read<GameViewModel>().getLevelIndex(),
           'word': context.read<GameViewModel>().focusedWord?.word ?? '',
         };
 
-        switch(product.coins) {
+        switch (product.coins) {
           case 100:
             analytics.fireEventWithMap(AnalyticsEvents.onBuy100, params);
             break;

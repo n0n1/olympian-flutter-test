@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../models/products_model.dart';
-import '../services/analytics_service.dart';
-import '../viewmodels/game_viewmodel.dart';
 import 'package:provider/provider.dart';
 
+import '../models/products_model.dart';
+import '../services/analytics_service.dart';
 import '../styles.dart';
+import '../viewmodels/game_viewmodel.dart';
 import '../viewmodels/payment_viewmodel.dart';
 import 'dialog_wrapper.dart';
 import 'loading_dialog.dart';
@@ -22,9 +22,8 @@ class _InAppContentState extends State<InAppContent> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      await Provider
-        .of<PaymentViewModel>(context, listen: false)
-        .loadProducts();
+      await Provider.of<PaymentViewModel>(context, listen: false)
+          .loadProducts();
     });
   }
 
@@ -56,23 +55,34 @@ class _InAppContentState extends State<InAppContent> {
               if (vm.productsLoading)
                 const Column(
                   children: [
-                    SizedBox(height: 60,),
+                    SizedBox(
+                      height: 60,
+                    ),
                     CircularProgressIndicator(),
                   ],
                 ),
               if (!vm.productsLoading)
                 Wrap(
                   children: [
-                    ...context.read<PaymentViewModel>().products.where((e) => e.id != 'adv_off').map((product) {
+                    ...context
+                        .read<PaymentViewModel>()
+                        .products
+                        .where((e) => e.id != 'adv_off')
+                        .map((product) {
                       return GestureDetector(
                         onTap: () {
-                          final closeDialog = showLoadingScreen(context: context);
+                          final closeDialog =
+                              showLoadingScreen(context: context);
                           vm.buyProduct(
                             product: product,
                             onComplete: (int coins) {
                               closeDialog();
-                              context.read<GameViewModel>().buyPointsComplete(coins);
-                              context.read<GameViewModel>().firePaymentComplete();
+                              context
+                                  .read<GameViewModel>()
+                                  .buyPointsComplete(coins);
+                              context
+                                  .read<GameViewModel>()
+                                  .firePaymentComplete();
                             },
                             onError: () {
                               closeDialog();
@@ -83,16 +93,18 @@ class _InAppContentState extends State<InAppContent> {
 
                           final params = {
                             'level_id': ctrl.activeLevel.id,
-                            'level': ctrl.getLevelIndex() as int,
+                            'level': ctrl.getLevelIndex(),
                             'word': ctrl.focusedWord?.word ?? '',
                           };
 
-                          switch(product.id) {
+                          switch (product.id) {
                             case 'product_100':
-                              analytics.fireEventWithMap(AnalyticsEvents.onBuy100, params);
+                              analytics.fireEventWithMap(
+                                  AnalyticsEvents.onBuy100, params);
                               break;
                             case 'product_1000':
-                              analytics.fireEventWithMap(AnalyticsEvents.onBuy1000, params);
+                              analytics.fireEventWithMap(
+                                  AnalyticsEvents.onBuy1000, params);
                               break;
                           }
                         },
@@ -129,8 +141,10 @@ class _InAppContentState extends State<InAppContent> {
                     if (!gameVm.getAdvSettings())
                       GestureDetector(
                         onTap: () {
-                          final product = context.read<PaymentViewModel>().productAdvOff;
-                          final closeDialog = showLoadingScreen(context: context);
+                          final product =
+                              context.read<PaymentViewModel>().productAdvOff;
+                          final closeDialog =
+                              showLoadingScreen(context: context);
                           vm.buyProduct(
                             product: product!,
                             onComplete: (int coins) {
@@ -146,10 +160,11 @@ class _InAppContentState extends State<InAppContent> {
 
                           final params = {
                             'level_id': ctrl.activeLevel.id,
-                            'level': ctrl.getLevelIndex() as int,
+                            'level': ctrl.getLevelIndex(),
                             'word': ctrl.focusedWord?.word ?? '',
                           };
-                          analytics.fireEventWithMap(AnalyticsEvents.advOff, params);
+                          analytics.fireEventWithMap(
+                              AnalyticsEvents.advOff, params);
                         },
                         child: Stack(
                           children: [
