@@ -1,12 +1,13 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 
-import '../services/payment_service.dart';
 import '../models/products_model.dart';
+import '../services/payment_service.dart';
 
 class PaymentViewModel with ChangeNotifier {
   final PaymentService _payment = PaymentService();
@@ -37,12 +38,15 @@ class PaymentViewModel with ChangeNotifier {
     });
   }
 
-  Future<void> _handlePurchaseUpdates(List<PurchaseDetails> purchaseDetails) async {
+  Future<void> _handlePurchaseUpdates(
+      List<PurchaseDetails> purchaseDetails) async {
     for (final purchase in purchaseDetails) {
-      print('Received purchase update for:');
-      print('\t- Product ID: ${purchase.productID}');
-      print('\t- Purchase ID: ${purchase.purchaseID}');
-      print('\t- Status: ${purchase.status}');
+      if (kDebugMode) {
+        print('Received purchase update for:');
+        print('\t- Product ID: ${purchase.productID}');
+        print('\t- Purchase ID: ${purchase.purchaseID}');
+        print('\t- Status: ${purchase.status}');
+      }
 
       if (purchase.status == PurchaseStatus.pending) {
         purchasePending = true;
@@ -55,7 +59,8 @@ class PaymentViewModel with ChangeNotifier {
         }
       }
 
-      if (purchase.status == PurchaseStatus.error || purchase.status == PurchaseStatus.canceled) {
+      if (purchase.status == PurchaseStatus.error ||
+          purchase.status == PurchaseStatus.canceled) {
         _onError();
       }
 
@@ -75,7 +80,8 @@ class PaymentViewModel with ChangeNotifier {
     notifyListeners();
 
     Set<String> kIds = availableInAppProducts.keys.toSet();
-    final ProductDetailsResponse response = await _inApp.queryProductDetails(kIds);
+    final ProductDetailsResponse response =
+        await _inApp.queryProductDetails(kIds);
     products.clear();
     products.addAll(response.productDetails);
     products.sort((a, b) => a.rawPrice.compareTo(b.rawPrice));
@@ -112,9 +118,9 @@ class PaymentViewModel with ChangeNotifier {
     // cancel all transactions.
     if (Platform.isIOS) {
       var transactions = await SKPaymentQueueWrapper().transactions();
-      transactions.forEach((skPaymentTransactionWrapper) {
+      for (var skPaymentTransactionWrapper in transactions) {
         SKPaymentQueueWrapper().finishTransaction(skPaymentTransactionWrapper);
-      });
+      }
     }
     _inApp.buyConsumable(purchaseParam: purchaseParam);
   }

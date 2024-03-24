@@ -65,9 +65,12 @@ void main() async {
     await setupInit();
     runApp(const _App());
   }, (error, stackTrace) {
-    print(error);
-    print(stackTrace);
-    print('runZonedGuarded: Caught error in my root zone.');
+    if (kDebugMode) {
+      print(error);
+      print(stackTrace);
+      print('runZonedGuarded: Caught error in my root zone.');
+    }
+
     if (kReleaseMode) {
       FirebaseCrashlytics.instance.recordError(error, stackTrace);
     }

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import '../viewmodels/game_viewmodel.dart';
 import 'package:provider/provider.dart';
 
+import '../models/word_model.dart';
 import '../styles.dart';
+import '../utils/ext.dart';
+import '../viewmodels/game_viewmodel.dart';
 import 'image_dialog.dart';
 import 'shake.dart';
-import '../utils/ext.dart';
-import '../models/word_model.dart';
-import 'wrong_answer_dialog.dart';
+// TODO: fixme;
+// import 'wrong_answer_dialog.dart';
 
 // ignore: constant_identifier_names
 const ANIMATION_DURATION = 100;
@@ -41,9 +42,9 @@ class _WordItemState extends State<WordItem> {
 
     _wordFocusNode.addListener(() {
       context.read<GameViewModel>().wordFocus(
-        word: widget.word,
-        focus: _wordFocusNode.hasFocus,
-      );
+            word: widget.word,
+            focus: _wordFocusNode.hasFocus,
+          );
 
       if (!_wordFocusNode.hasFocus) {
         context.read<GameViewModel>().clearActiveWord();
@@ -66,21 +67,22 @@ class _WordItemState extends State<WordItem> {
           onShow: () {
             _wordFocusNode.unfocus();
             _textController.clear();
-          }
-      );
+          });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final showInput = [WordState.idle, WordState.incorrect, WordState.input].contains(widget.word.state);
-    final showImageInput = widget.word.image != '' || widget.word.description != '';
+    final showInput = [WordState.idle, WordState.incorrect, WordState.input]
+        .contains(widget.word.state);
+    final showImageInput =
+        widget.word.image != '' || widget.word.description != '';
 
     if (!_wordFocusNode.hasFocus && _textController.value.text != '') {
       _textController.clear();
     }
 
-    final _isCorrectWordLong = widget.word.word.length > 10;
+    final isCorrectWordLong = widget.word.word.length > 10;
 
     return ExcludeSemantics(
       child: ShakeAnimation(
@@ -109,7 +111,7 @@ class _WordItemState extends State<WordItem> {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: ThemeText.wordItemCorrect.merge(
-                          TextStyle(fontSize: _isCorrectWordLong ? 12 : 16)),
+                          TextStyle(fontSize: isCorrectWordLong ? 12 : 16)),
                       textAlign: TextAlign.center,
                     ),
                   ),
