@@ -1,16 +1,20 @@
 import 'dart:math';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+
+import '../services/notification_service.dart';
 import '../utils/physics.dart';
 import '../viewmodels/game_viewmodel.dart';
 import '../widgets/base_scaffold.dart';
+import '../widgets/help_button.dart';
 import '../widgets/score_bar.dart';
 import '../widgets/word_item.dart';
-import '../widgets/help_button.dart';
-import '../services/notification_service.dart';
 
+/// Поле игры
 class AreaScreen extends StatelessWidget {
   const AreaScreen({Key? key}) : super(key: key);
 
@@ -77,6 +81,7 @@ class __NestedScrollState extends State<_NestedScroll> {
   double widthOffset = 0.0;
   double wordWidth = 160.0;
   double itemHeight = 66.0;
+  OverlayEntry? entry;
 
   @override
   void initState() {
@@ -84,6 +89,7 @@ class __NestedScrollState extends State<_NestedScroll> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       final notifications = NotificationService();
       notifications.init(context: context);
+      _buildOverlaySquare();
     });
     super.initState();
   }
@@ -120,6 +126,9 @@ class __NestedScrollState extends State<_NestedScroll> {
                   ...groups.map((group) {
                     final index = vm.groups.indexOf(group);
                     final page = (widthOffset / wordWidth).floor();
+                    if (kDebugMode) {
+                      print('index:$index page:$page');
+                    }
 
                     var itemCounts = vm.groups[page > 0 ? page : 0].length;
                     return Container(
@@ -140,6 +149,7 @@ class __NestedScrollState extends State<_NestedScroll> {
                                 (widthOffset / wordWidth).floor() <= index;
                             final showStartLeaf =
                                 (widthOffset / wordWidth).floor() == index;
+
                             return AnimatedBuilder(
                               animation: _scrollCtrl,
                               builder: (context, child) {
@@ -229,5 +239,35 @@ class __NestedScrollState extends State<_NestedScroll> {
     final offsetValue = max<double>((totalDepthHeight / depth) / 2, 0.0);
 
     return offsetValue;
+  }
+
+  Widget buildOverlay() {
+    return Lottie.asset(
+      'assets/animations/Animation.json',
+    );
+  }
+
+  void findSectionPosition() {}
+
+  void _buildOverlaySquare() {
+    final overlay = Overlay.of(context);
+    final renderBox = context.findRenderObject() as RenderBox;
+    final size = renderBox.size;
+    final position = renderBox.globalToLocal(Offset.zero);
+
+    // final renderBoxWord =
+    //     dataKey.currentContext!.findRenderObject() as RenderBox;
+    // final sizeWord = renderBoxWord.size;
+    // final positionWord = renderBoxWord.globalToLocal(Offset.zero);
+
+    entry = OverlayEntry(
+      builder: (context) => Positioned(
+        width: size.width * .5,
+        left: position.dx,
+        top: position.dy + size.height * .5,
+        child: buildOverlay(),
+      ),
+    );
+    overlay.insert(entry!);
   }
 }

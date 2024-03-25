@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import '../services/analytics_service.dart';
-import '../viewmodels/game_viewmodel.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../services/analytics_service.dart';
 import '../styles.dart';
+import '../viewmodels/game_viewmodel.dart';
 import '../viewmodels/settings_viewmodel.dart';
 import 'area_screen.dart';
 import 'levels_screen.dart';
@@ -19,6 +19,9 @@ final List<String> imgList = [
   'assets/images/onboard_7.jpg',
 ];
 
+/// Онбординг приложения
+/// Показывается при первом старте
+/// TODO: ShowOnboardingUsecase
 class OnBoardingScreen extends StatefulWidget {
   const OnBoardingScreen({Key? key}) : super(key: key);
 

@@ -2,17 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../services/analytics_service.dart';
+import '../styles.dart';
 import '../viewmodels/game_viewmodel.dart';
 import '../viewmodels/settings_viewmodel.dart';
 import '../widgets/base_scaffold.dart';
 import '../widgets/image_button.dart';
 import '../widgets/score_bar.dart';
 import '../widgets/settings_dialog.dart';
-import '../styles.dart';
 import 'area_screen.dart';
 import 'levels_screen.dart';
 import 'onboarding_screen.dart';
 
+/// Меню игры / Точка входа
 class EntryScreen extends StatefulWidget {
   const EntryScreen({Key? key}) : super(key: key);
 

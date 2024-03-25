@@ -1,13 +1,15 @@
-import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../models/level_model.dart';
+import '../styles.dart';
 import '../viewmodels/game_viewmodel.dart';
 import '../widgets/base_scaffold.dart';
 import '../widgets/score_bar.dart';
-import '../styles.dart';
 import 'area_screen.dart';
 
+/// Представление для просмотра уровней
+///
 class LevelsScreen extends StatelessWidget {
   const LevelsScreen({Key? key}) : super(key: key);
 

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../styles.dart';
 
+/// Реклама
 class AdvTimeScreen extends StatefulWidget {
   const AdvTimeScreen({super.key});
 

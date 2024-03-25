@@ -51,6 +51,7 @@ setupInit() async {
   await analytics.init();
 
   if (defaultTargetPlatform == TargetPlatform.android) {
+    // TODO: enablePendingPurchases is deprecated
     InAppPurchaseAndroidPlatformAddition.enablePendingPurchases();
   }
 

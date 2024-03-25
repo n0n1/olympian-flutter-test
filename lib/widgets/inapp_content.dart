@@ -9,6 +9,7 @@ import '../viewmodels/payment_viewmodel.dart';
 import 'dialog_wrapper.dart';
 import 'loading_dialog.dart';
 
+/// Внутренние покупки
 class InAppContent extends StatefulWidget {
   final String title;
   const InAppContent({Key? key, required this.title}) : super(key: key);
