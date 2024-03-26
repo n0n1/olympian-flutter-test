@@ -6,16 +6,16 @@ import 'package:hive_flutter/hive_flutter.dart';
 // import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:provider/provider.dart';
 
+import 'core/presentation/restart_app.dart';
 import 'di/dep_injection.dart';
-import 'screens/entry_screen.dart';
+import 'features/payments/presentation/viewmodels/payment_viewmodel.dart';
+import 'features/payments/presentation/viewmodels/promocode_viewmodel.dart';
+import 'features/settings/presentation/viewmodels/settings_viewmodel.dart';
+import 'features/word_game/presentation/view/entry_screen.dart';
+import 'features/word_game/presentation/viewmodels/game_viewmodel.dart';
 // import 'services/ad_service.dart';
 
 import 'shared.dart';
-import 'viewmodels/game_viewmodel.dart';
-import 'viewmodels/payment_viewmodel.dart';
-import 'viewmodels/promocode_viewmodel.dart';
-import 'viewmodels/settings_viewmodel.dart';
-import 'widgets/restart_app.dart';
 
 Future<void> configureDeps() async {
   await $conf.init();

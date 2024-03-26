@@ -2,16 +2,14 @@ import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 
+/// TODO: fixme add env
 abstract class Config {
   static const String kassaShopId = '1111';
-  static const String kassaToken =
-      '1111';
+  static const String kassaToken = '1111';
 
   static const String amplitudeToken = '1111';
   static const String appMetrikaToken = '1111';
-  static final String appodealToken = Platform.isAndroid
-    ? '1111'
-    : '1111';
+  static final String appodealToken = Platform.isAndroid ? '1111' : '1111';
 
   static const firebaseOptions = FirebaseOptions(
     apiKey: '1111',

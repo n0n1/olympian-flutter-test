@@ -1,12 +1,12 @@
 // ignore: unused_import
 import 'package:firebase_core/firebase_core.dart';
 
+import 'core/services/analytics_service.dart';
 import 'core/services/audio_service.dart';
 import 'core/services/config_service.dart';
-import 'services/analytics_service.dart';
-import 'services/db_service.dart';
-import 'services/notification_service.dart';
-import 'services/payment_service.dart';
+import 'core/services/db_service.dart';
+import 'features/notifications/services/notification_service.dart';
+import 'features/payments/services/payment_service.dart';
 import 'shared.dart';
 
 // Styles
