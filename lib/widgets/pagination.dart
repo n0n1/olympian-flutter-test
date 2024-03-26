@@ -1,5 +1,4 @@
-import 'dart:math';
-import 'package:flutter/material.dart';
+import '../shared.dart';
 
 const double _itemSize = 7.0;
 const double _maxZoom = 2;

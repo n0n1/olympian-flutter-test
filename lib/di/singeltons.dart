@@ -1,9 +1,9 @@
 import 'package:get_it/get_it.dart';
 
 import '../core/presentation/viewmodels/app_view_mode.dart';
+import '../core/services/audio_service.dart';
+import '../core/services/config_service.dart';
 import '../services/analytics_service.dart';
-import '../services/audio_service.dart';
-import '../services/config_service.dart';
 import '../services/db_service.dart';
 import '../services/notification_service.dart';
 import '../services/payment_service.dart';

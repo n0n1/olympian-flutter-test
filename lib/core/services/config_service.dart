@@ -5,8 +5,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
 
-import '../config/config.dart';
-import '../models/config_model.dart';
+import '../../config/config.dart';
+import '../data/models/config_model.dart';
 
 class ConfigService {
   late FirebaseRemoteConfig remoteConfig;

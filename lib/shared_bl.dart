@@ -1,9 +1,9 @@
 // ignore: unused_import
 import 'package:firebase_core/firebase_core.dart';
 
+import 'core/services/audio_service.dart';
+import 'core/services/config_service.dart';
 import 'services/analytics_service.dart';
-import 'services/audio_service.dart';
-import 'services/config_service.dart';
 import 'services/db_service.dart';
 import 'services/notification_service.dart';
 import 'services/payment_service.dart';
