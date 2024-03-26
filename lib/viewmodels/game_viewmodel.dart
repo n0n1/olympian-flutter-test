@@ -1,13 +1,13 @@
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 
+import '../core/utils/format.dart';
 import '../models/level_model.dart';
 import '../models/notification_model.dart';
 import '../models/word_model.dart';
 import '../screens/adv_time_screen.dart';
 import '../services/analytics_service.dart';
 import '../shared.dart';
-import '../utils/format.dart';
 import '../widgets/game_complete_dialog.dart';
 import '../widgets/level_complete_dialog.dart';
 import '../widgets/shop_dialog.dart';

@@ -4,10 +4,10 @@ import 'package:in_app_review/in_app_review.dart';
 import 'package:provider/provider.dart';
 
 import '../core/styles/styles.dart';
+import '../core/utils/ext.dart';
 import '../models/products_model.dart';
 import '../services/analytics_service.dart';
 import '../shared.dart';
-import '../utils/ext.dart';
 import '../viewmodels/game_viewmodel.dart';
 import '../viewmodels/payment_viewmodel.dart';
 import 'dialog_wrapper.dart';

@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../core/presentation/animations/shake.dart';
 import '../core/styles/styles.dart';
+import '../core/utils/ext.dart';
 import '../models/word_model.dart';
-import '../utils/ext.dart';
 import '../viewmodels/game_viewmodel.dart';
 import 'image_dialog.dart';
 // TODO: fixme;

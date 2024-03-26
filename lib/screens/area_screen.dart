@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
 import '../core/presentation/illustrations/bottom_decoration_gradient.dart';
+import '../core/utils/physics.dart';
 import '../shared.dart';
-import '../utils/physics.dart';
 import '../viewmodels/game_viewmodel.dart';
 import '../widgets/area_kit/area_page_controls.dart';
 import '../widgets/base_scaffold.dart';
