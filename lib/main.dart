@@ -39,6 +39,7 @@ Future<void> main() async {
   await inject();
   await configureDeps();
 
+  // TODO: fixme
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
     runApp(const _App());
