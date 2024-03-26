@@ -1,18 +1,10 @@
-import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
+import 'package:just_audio/just_audio.dart';
 
-import 'db_service.dart';
+import '../shared.dart';
 
 class AudioService {
-  final DbService _db = DbService();
-  static final AudioService _singleton = AudioService._internal();
   final AudioPlayer _player = AudioPlayer();
-
-  factory AudioService() {
-    return _singleton;
-  }
-
-  AudioService._internal();
 
   init() async {
     final session = await AudioSession.instance;
@@ -22,7 +14,7 @@ class AudioService {
   }
 
   _isMicDisabled() {
-    return _db.get('mic', 1) == 0 ? true : false;
+    return $DB.get('mic', 1) == 0 ? true : false;
   }
 
   playRightAnswer() {

@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../core/styles/styles.dart';
 import '../services/analytics_service.dart';
-import '../styles.dart';
+import '../shared.dart';
 import '../viewmodels/game_viewmodel.dart';
 import '../viewmodels/settings_viewmodel.dart';
 import '../widgets/base_scaffold.dart';
@@ -39,8 +39,6 @@ class _EntryScreenState extends State<EntryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final AnalyticsService analytics = AnalyticsService();
-
     return BaseScaffold(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -78,7 +76,7 @@ class _EntryScreenState extends State<EntryScreen> {
                         context,
                         MaterialPageRoute(builder: (_) => const AreaScreen()),
                       );
-                      analytics.fireEvent(AnalyticsEvents.onPlayTap);
+                      $analytics.fireEvent(AnalyticsEvents.onPlayTap);
                     },
                     type: ImageButtonType.play,
                     width: 230.0,
@@ -103,7 +101,7 @@ class _EntryScreenState extends State<EntryScreen> {
               ImageButton(
                 onTap: () {
                   context.read<GameViewModel>().tapPlay();
-                  analytics.fireEvent(AnalyticsEvents.onLevelsTap);
+                  $analytics.fireEvent(AnalyticsEvents.onLevelsTap);
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const LevelsScreen()),
@@ -119,7 +117,7 @@ class _EntryScreenState extends State<EntryScreen> {
               ImageButton(
                 onTap: () {
                   context.read<GameViewModel>().tapPlay();
-                  analytics.fireEvent(AnalyticsEvents.onSettingsTap);
+                  $analytics.fireEvent(AnalyticsEvents.onSettingsTap);
                   showDialog(
                     context: context,
                     barrierColor: Colors.black38,

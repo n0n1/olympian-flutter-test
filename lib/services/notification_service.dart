@@ -8,16 +8,9 @@ import '../models/notification_model.dart';
 import '../viewmodels/game_viewmodel.dart';
 
 class NotificationService {
-  static final NotificationService _singleton = NotificationService._internal();
   BuildContext? ctx;
 
-  factory NotificationService() {
-    return _singleton;
-  }
-
-  NotificationService._internal();
-
-  init({ required BuildContext context }) {
+  init({required BuildContext context}) {
     ctx = context;
 
     if (kDebugMode) {
@@ -32,15 +25,19 @@ class NotificationService {
       if (event.notification.additionalData == null) {
         return;
       }
-      final data = NotificationModel.fromJson(event.notification.additionalData!);
+      final data =
+          NotificationModel.fromJson(event.notification.additionalData!);
       if (data.addCoins != 0) {
-        OneSignal.User.addTagWithKey(NotificationDataKeys.notificationOpen.toString(), true);
+        OneSignal.User.addTagWithKey(
+            NotificationDataKeys.notificationOpen.toString(), true);
         ctx!.read<GameViewModel>().updateCoins(data.addCoins);
       }
     });
-    
+
     OneSignal.Notifications.addPermissionObserver((permission) {
-      OneSignal.User.addTagWithKey(NotificationDataKeys.notificationPermissionAccepted.toString(), permission);
+      OneSignal.User.addTagWithKey(
+          NotificationDataKeys.notificationPermissionAccepted.toString(),
+          permission);
     });
   }
 }

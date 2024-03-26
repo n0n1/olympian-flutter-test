@@ -1,13 +1,12 @@
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../styles.dart';
-import '../viewmodels/game_viewmodel.dart';
-import '../services/config_service.dart';
+import '../core/styles/styles.dart';
 import '../services/analytics_service.dart';
+import '../shared.dart';
+import '../viewmodels/game_viewmodel.dart';
+import 'inapp_content.dart';
 import 'promocodes.dart';
 import 'youkassa_content.dart';
-import 'inapp_content.dart';
 
 class ShopDialog extends StatefulWidget {
   final String title;
@@ -20,8 +19,8 @@ class ShopDialog extends StatefulWidget {
 
 class _ShopDialogState extends State<ShopDialog> {
   var _showPromoCode = false;
-  final _analytics = AnalyticsService();
-  final bool useOnlyApplePay = ConfigService().getUseOnlyApplePay();
+
+  final bool useOnlyApplePay = $conf.getUseOnlyApplePay();
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +85,7 @@ class _ShopDialogState extends State<ShopDialog> {
                           child: Center(
                             child: GestureDetector(
                               onTap: () async {
-                                _analytics
+                                $analytics
                                     .fireEvent(AnalyticsEvents.onShowAdvTap);
                                 context.read<GameViewModel>().showAd(() {
                                   Navigator.of(context).pop();

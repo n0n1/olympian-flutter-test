@@ -1,9 +1,9 @@
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../core/styles/styles.dart';
 import '../services/analytics_service.dart';
-import '../styles.dart';
+import '../shared.dart';
 import '../viewmodels/game_viewmodel.dart';
 import '../viewmodels/settings_viewmodel.dart';
 import 'area_screen.dart';
@@ -39,7 +39,6 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final analytics = AnalyticsService();
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -67,7 +66,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                     onPageChanged: (index, reason) {
                       setState(() {
                         _current = index;
-                        analytics.fireEventWithMap(
+                        $analytics.fireEventWithMap(
                           AnalyticsEvents.onOnboardingNextSlide,
                           {'slide': index},
                         );
@@ -116,7 +115,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                     .setOnBoardingDone();
                 if ((_current + 1) == imgList.length) {
                   Provider.of<GameViewModel>(context, listen: false).play();
-                  analytics.fireEvent(AnalyticsEvents.onOnboardingFinish);
+                  $analytics.fireEvent(AnalyticsEvents.onOnboardingFinish);
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const LevelsScreen()),
@@ -126,7 +125,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                     MaterialPageRoute(builder: (_) => const AreaScreen()),
                   );
                 } else {
-                  analytics.fireEventWithMap(
+                  $analytics.fireEventWithMap(
                       AnalyticsEvents.onOnboardingSkip, {'slide': _current});
                 }
               },

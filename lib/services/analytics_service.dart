@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:amplitude_flutter/amplitude.dart';
@@ -7,8 +6,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 
 import '../config/config.dart';
-import 'config_service.dart';
-import 'db_service.dart';
+import '../shared.dart' show $DB, $conf, log;
 
 enum AnalyticsEvents {
   sessionFirstTime,
@@ -49,8 +47,7 @@ enum AnalyticsEvents {
 class AnalyticsService {
   String deviceId = '';
   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-  final DbService _db = DbService();
-  static final AnalyticsService _singleton = AnalyticsService._internal();
+
   final Amplitude analytics =
       Amplitude.getInstance(instanceName: 'Kin-dza-dza');
   final _config = const AppMetricaConfig(
@@ -58,12 +55,6 @@ class AnalyticsService {
     logs: false,
     locationTracking: false,
   );
-
-  factory AnalyticsService() {
-    return _singleton;
-  }
-
-  AnalyticsService._internal();
 
   init() async {
     analytics.init(Config.amplitudeToken);
@@ -77,13 +68,14 @@ class AnalyticsService {
       deviceId = iosInfo.identifierForVendor ?? '';
     }
 
-    if (!_db.firstTimeSession()) {
+    if (!$DB.firstTimeSession()) {
       fireEventWithMap(AnalyticsEvents.sessionFirstTime, {
         'device': deviceId,
       });
     } else {
-      fireEventWithMap(AnalyticsEvents.sessionStart,
-          {'configVersion': ConfigService().appConfig.configVersion});
+      fireEventWithMap(AnalyticsEvents.sessionStart, {
+        'configVersion': $conf.appConfig.configVersion,
+      });
     }
   }
 
@@ -98,8 +90,8 @@ class AnalyticsService {
 
   void fireEventWithMap(
       AnalyticsEvents event, Map<String, Object>? attributes) {
-    log(event.name);
-    log(attributes.toString());
+    // log(event.name);
+    // log(attributes.toString());
     if (kDebugMode) {
       return;
     }

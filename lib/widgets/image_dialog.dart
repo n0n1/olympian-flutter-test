@@ -1,14 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/level_model.dart';
 
+import '../core/presentation/animations/shake.dart';
+import '../core/styles/styles.dart';
+import '../models/level_model.dart';
 import '../models/word_model.dart';
-import '../styles.dart';
 import '../viewmodels/game_viewmodel.dart';
 import 'help_button.dart';
 import 'image_button.dart';
-import 'shake.dart';
 
 class ImageDialog extends StatefulWidget {
   final WordModel word;
@@ -150,7 +150,10 @@ class _ImageDialogState extends State<ImageDialog> {
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(6),
                     gradient: const LinearGradient(
-                      colors: [Color.fromRGBO(222, 188, 132, 1), Color.fromRGBO(137, 106, 54, 1)],
+                      colors: [
+                        Color.fromRGBO(222, 188, 132, 1),
+                        Color.fromRGBO(137, 106, 54, 1)
+                      ],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                     )),
@@ -158,7 +161,10 @@ class _ImageDialogState extends State<ImageDialog> {
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(4),
                       gradient: const LinearGradient(
-                        colors: [Color.fromRGBO(137, 106, 54, 1), Color.fromRGBO(255, 218, 164, 1)],
+                        colors: [
+                          Color.fromRGBO(137, 106, 54, 1),
+                          Color.fromRGBO(255, 218, 164, 1)
+                        ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                       )),
@@ -170,7 +176,9 @@ class _ImageDialogState extends State<ImageDialog> {
                       wrongAnswer();
                     },
                     onTap: wrongAnswer,
-                    style: widget.word.state == WordState.correct ? ThemeText.wordItemCorrect : ThemeText.wordItemInput,
+                    style: widget.word.state == WordState.correct
+                        ? ThemeText.wordItemCorrect
+                        : ThemeText.wordItemInput,
                     onSubmitted: (value) {
                       if (!widget.vm.checkWord(
                             word: widget.word,
@@ -182,7 +190,8 @@ class _ImageDialogState extends State<ImageDialog> {
                         _textController.clear();
                         widget.focusNode.requestFocus();
                         _shakeKey.currentState?.shake();
-                      } else if (widget.vm.activeLevel.state != LevelState.success) {
+                      } else if (widget.vm.activeLevel.state !=
+                          LevelState.success) {
                         Navigator.pop(context);
                         widget.vm.clearActiveWord();
                         widget.focusNode.unfocus();

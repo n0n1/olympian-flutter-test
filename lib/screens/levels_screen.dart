@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../core/styles/styles.dart';
 import '../models/level_model.dart';
-import '../styles.dart';
 import '../viewmodels/game_viewmodel.dart';
 import '../widgets/base_scaffold.dart';
 import '../widgets/score_bar.dart';

@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../core/styles/styles.dart';
 import '../models/products_model.dart';
 import '../services/analytics_service.dart';
-import '../styles.dart';
+import '../shared.dart';
 import '../viewmodels/game_viewmodel.dart';
 import 'dialog_wrapper.dart';
 import 'youkassa_payment.dart';
@@ -15,7 +15,6 @@ class YouKassaContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AnalyticsService analytics = AnalyticsService();
     final gameVm = context.watch<GameViewModel>();
     return Padding(
       padding: const EdgeInsets.only(top: 40.0),
@@ -56,7 +55,7 @@ class YouKassaContent extends StatelessWidget {
                                   '',
                         };
 
-                        analytics.fireEventWithMap(
+                        $analytics.fireEventWithMap(
                             AnalyticsEvents.advOff, params);
 
                         Navigator.push(
@@ -97,8 +96,6 @@ class YouKassaContent extends StatelessWidget {
   }
 
   _buildProduct({required BuildContext context, required ProductItem product}) {
-    final AnalyticsService analytics = AnalyticsService();
-
     return GestureDetector(
       onTap: () {
         final params = {
@@ -109,10 +106,10 @@ class YouKassaContent extends StatelessWidget {
 
         switch (product.coins) {
           case 100:
-            analytics.fireEventWithMap(AnalyticsEvents.onBuy100, params);
+            $analytics.fireEventWithMap(AnalyticsEvents.onBuy100, params);
             break;
           case 1000:
-            analytics.fireEventWithMap(AnalyticsEvents.onBuy1000, params);
+            $analytics.fireEventWithMap(AnalyticsEvents.onBuy1000, params);
             break;
         }
         Navigator.push(

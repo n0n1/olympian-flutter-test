@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../styles.dart';
+import '../core/styles/styles.dart';
 import '../viewmodels/game_viewmodel.dart';
 import '../viewmodels/promocode_viewmodel.dart';
 import 'dialog_wrapper.dart';

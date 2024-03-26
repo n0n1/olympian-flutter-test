@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../core/styles/styles.dart';
 import '../services/analytics_service.dart';
-import '../styles.dart';
+import '../shared.dart';
 import '../viewmodels/game_viewmodel.dart';
 import 'dialog_wrapper.dart';
 import 'image_button.dart';
@@ -23,11 +23,11 @@ class _WrongAnswerDialogState extends State<WrongAnswerDialog> {
   @override
   Widget build(BuildContext context) {
     final vm = Provider.of<GameViewModel>(context);
-    final analytics = AnalyticsService();
 
     return Dialog(
       elevation: 0,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 12.0),
+      insetPadding:
+          const EdgeInsets.symmetric(horizontal: 10.0, vertical: 12.0),
       clipBehavior: Clip.none,
       backgroundColor: Colors.transparent,
       child: DialogWrapper(
@@ -102,7 +102,7 @@ class _WrongAnswerDialogState extends State<WrongAnswerDialog> {
                     if (snapshot.data!) {
                       return ImageButton(
                         onTap: () {
-                          analytics.fireEvent(AnalyticsEvents.onShowAdvTap);
+                          $analytics.fireEvent(AnalyticsEvents.onShowAdvTap);
                           vm.showAd(() {
                             vm.wrongAnswerCount = 0;
                             Navigator.of(context).pop();

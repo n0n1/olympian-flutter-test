@@ -1,16 +1,14 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:provider/provider.dart';
 
+import '../core/styles/styles.dart';
 import '../models/products_model.dart';
 import '../services/analytics_service.dart';
-import '../viewmodels/game_viewmodel.dart';
-import '../services/config_service.dart';
+import '../shared.dart';
 import '../utils/ext.dart';
-
-import '../styles.dart';
+import '../viewmodels/game_viewmodel.dart';
 import '../viewmodels/payment_viewmodel.dart';
 import 'dialog_wrapper.dart';
 import 'loading_dialog.dart';
@@ -24,14 +22,12 @@ class LevelCompleteDialog extends StatefulWidget {
 }
 
 class _LevelCompleteDialogState extends State<LevelCompleteDialog> {
-  final AnalyticsService _analytics = AnalyticsService();
-  final ConfigService config = ConfigService();
   final InAppReview inAppReview = InAppReview.instance;
 
   @override
   void initState() {
     final vm = context.read<GameViewModel>();
-    _analytics.fireEventWithMap(
+    $analytics.fireEventWithMap(
       AnalyticsEvents.onLevelComplete,
       {
         'level_id': vm.activeLevel.id,
@@ -42,7 +38,8 @@ class _LevelCompleteDialogState extends State<LevelCompleteDialog> {
     _showReview();
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      await Provider.of<PaymentViewModel>(context, listen: false).loadProducts();
+      await Provider.of<PaymentViewModel>(context, listen: false)
+          .loadProducts();
     });
     super.initState();
   }
@@ -51,10 +48,11 @@ class _LevelCompleteDialogState extends State<LevelCompleteDialog> {
     final vm = context.read<GameViewModel>();
 
     Future.delayed(const Duration(seconds: 1), () async {
-      if (vm.getLevelIndex() > config.getRatingMinThreshold() && vm.getLevelIndex() % config.getRatingStep() != 0) {
+      if (vm.getLevelIndex() > $conf.getRatingMinThreshold() &&
+          vm.getLevelIndex() % $conf.getRatingStep() != 0) {
         if (await inAppReview.isAvailable()) {
           inAppReview.requestReview();
-          _analytics.fireEvent(AnalyticsEvents.onAppReviewTap);
+          $analytics.fireEvent(AnalyticsEvents.onAppReviewTap);
         }
       }
     });
@@ -62,7 +60,6 @@ class _LevelCompleteDialogState extends State<LevelCompleteDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final AnalyticsService analytics = AnalyticsService();
     final paymentVm = context.watch<PaymentViewModel>();
     final vm = context.watch<GameViewModel>();
 
@@ -165,7 +162,8 @@ class _LevelCompleteDialogState extends State<LevelCompleteDialog> {
                       Navigator.of(context, rootNavigator: true).pop();
                       vm.showBanner(context: context);
                       vm.getNextLevel(context);
-                      _analytics.fireEventWithMap(AnalyticsEvents.onCompleteNextAction, {
+                      $analytics.fireEventWithMap(
+                          AnalyticsEvents.onCompleteNextAction, {
                         'button': 'next_level',
                         'level_id': vm.activeLevel.id,
                         'level': vm.getLevelIndex(),
@@ -187,15 +185,18 @@ class _LevelCompleteDialogState extends State<LevelCompleteDialog> {
                       'word': vm.focusedWord?.word ?? '',
                     };
 
-                    final bool useOnlyApplePay = ConfigService().getUseOnlyApplePay();
+                    final bool useOnlyApplePay = $conf.getUseOnlyApplePay();
                     if (useOnlyApplePay) {
-                      final product = context.read<PaymentViewModel>().productAdvOff;
+                      final product =
+                          context.read<PaymentViewModel>().productAdvOff;
                       final closeDialog = showLoadingScreen(context: context);
                       paymentVm.buyProduct(
                         product: product!,
                         onComplete: (int coins) {
                           closeDialog();
-                          context.read<GameViewModel>().buyPointsComplete(coins);
+                          context
+                              .read<GameViewModel>()
+                              .buyPointsComplete(coins);
                           context.read<GameViewModel>().firePaymentComplete();
                           Navigator.of(context, rootNavigator: true).pop();
                           vm.getNextLevel(context);
@@ -205,18 +206,22 @@ class _LevelCompleteDialogState extends State<LevelCompleteDialog> {
                         },
                         context: context,
                       );
-                      analytics.fireEventWithMap(AnalyticsEvents.advOff, params);
+                      $analytics.fireEventWithMap(
+                          AnalyticsEvents.advOff, params);
                     } else {
-                      analytics.fireEventWithMap(AnalyticsEvents.advOff, params);
+                      $analytics.fireEventWithMap(
+                          AnalyticsEvents.advOff, params);
 
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           fullscreenDialog: true,
                           builder: (context) => YouKassaPayment(
-                              product: availableProducts.firstWhere((e) => e.id == 'adv_off'),
+                              product: availableProducts
+                                  .firstWhere((e) => e.id == 'adv_off'),
                               onSuccess: () {
-                                Navigator.of(context, rootNavigator: true).pop();
+                                Navigator.of(context, rootNavigator: true)
+                                    .pop();
                                 vm.getNextLevel(context);
                               }),
                         ),
@@ -268,7 +273,8 @@ class AnimatedCounter extends StatefulWidget {
   _AnimatedCounterState createState() => _AnimatedCounterState();
 }
 
-class _AnimatedCounterState extends State<AnimatedCounter> with TickerProviderStateMixin {
+class _AnimatedCounterState extends State<AnimatedCounter>
+    with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 

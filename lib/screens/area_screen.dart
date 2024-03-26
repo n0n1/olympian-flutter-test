@@ -1,14 +1,11 @@
-import 'dart:math';
-
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
-import '../services/notification_service.dart';
+import '../core/presentation/illustrations/bottom_decoration_gradient.dart';
+import '../shared.dart';
 import '../utils/physics.dart';
 import '../viewmodels/game_viewmodel.dart';
+import '../widgets/area_kit/area_page_controls.dart';
 import '../widgets/base_scaffold.dart';
 import '../widgets/help_button.dart';
 import '../widgets/score_bar.dart';
@@ -61,35 +58,32 @@ class AreaScreen extends StatelessWidget {
             FocusScope.of(context).requestFocus(FocusNode());
             vm.clearActiveWord();
           },
-          child: const _NestedScroll(),
+          child: const NestedScroll(),
         ),
       ),
     );
   }
 }
 
-class _NestedScroll extends StatefulWidget {
-  const _NestedScroll({Key? key}) : super(key: key);
+class NestedScroll extends StatefulWidget {
+  const NestedScroll({Key? key}) : super(key: key);
 
   @override
-  __NestedScrollState createState() => __NestedScrollState();
+  NestedScrollState createState() => NestedScrollState();
 }
 
-class __NestedScrollState extends State<_NestedScroll> {
+class NestedScrollState extends State<NestedScroll> {
   final dataKey = GlobalKey();
   late final ScrollController _scrollCtrl;
   double widthOffset = 0.0;
   double wordWidth = 160.0;
   double itemHeight = 66.0;
-  OverlayEntry? entry;
 
   @override
   void initState() {
     _scrollCtrl = ScrollController();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      final notifications = NotificationService();
-      notifications.init(context: context);
-      _buildOverlaySquare();
+      $notification.init(context: context);
     });
     super.initState();
   }
@@ -192,42 +186,8 @@ class __NestedScrollState extends State<_NestedScroll> {
               ),
             ),
           ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              height: 40,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Colors.black87]),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 20,
-            left: 10,
-            right: 10,
-            child: Center(
-              child: AnimatedSmoothIndicator(
-                activeIndex: max(
-                    ((_scrollCtrl.hasClients ? _scrollCtrl.offset : 0) /
-                            wordWidth)
-                        .floor(),
-                    0),
-                count: groups.length,
-                effect: const ExpandingDotsEffect(
-                  dotWidth: 12,
-                  dotHeight: 8,
-                  expansionFactor: 2,
-                  dotColor: Color.fromRGBO(169, 126, 74, 1),
-                  activeDotColor: Color.fromRGBO(255, 244, 205, 1),
-                ),
-              ),
-            ),
-          )
+          const BottomGradient(),
+          const AreaPageControls(),
         ],
       ),
     );
@@ -239,35 +199,5 @@ class __NestedScrollState extends State<_NestedScroll> {
     final offsetValue = max<double>((totalDepthHeight / depth) / 2, 0.0);
 
     return offsetValue;
-  }
-
-  Widget buildOverlay() {
-    return Lottie.asset(
-      'assets/animations/Animation.json',
-    );
-  }
-
-  void findSectionPosition() {}
-
-  void _buildOverlaySquare() {
-    final overlay = Overlay.of(context);
-    final renderBox = context.findRenderObject() as RenderBox;
-    final size = renderBox.size;
-    final position = renderBox.globalToLocal(Offset.zero);
-
-    // final renderBoxWord =
-    //     dataKey.currentContext!.findRenderObject() as RenderBox;
-    // final sizeWord = renderBoxWord.size;
-    // final positionWord = renderBoxWord.globalToLocal(Offset.zero);
-
-    entry = OverlayEntry(
-      builder: (context) => Positioned(
-        width: size.width * .5,
-        left: position.dx,
-        top: position.dy + size.height * .5,
-        child: buildOverlay(),
-      ),
-    );
-    overlay.insert(entry!);
   }
 }

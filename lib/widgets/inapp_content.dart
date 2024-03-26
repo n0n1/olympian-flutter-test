@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../core/styles/styles.dart';
 import '../models/products_model.dart';
 import '../services/analytics_service.dart';
-import '../styles.dart';
+import '../shared.dart';
 import '../viewmodels/game_viewmodel.dart';
 import '../viewmodels/payment_viewmodel.dart';
 import 'dialog_wrapper.dart';
@@ -32,7 +32,6 @@ class _InAppContentState extends State<InAppContent> {
   Widget build(BuildContext context) {
     final vm = context.watch<PaymentViewModel>();
     final gameVm = context.watch<GameViewModel>();
-    final AnalyticsService analytics = AnalyticsService();
     return Padding(
       padding: const EdgeInsets.only(top: 40.0),
       child: DialogWrapper(
@@ -100,11 +99,11 @@ class _InAppContentState extends State<InAppContent> {
 
                           switch (product.id) {
                             case 'product_100':
-                              analytics.fireEventWithMap(
+                              $analytics.fireEventWithMap(
                                   AnalyticsEvents.onBuy100, params);
                               break;
                             case 'product_1000':
-                              analytics.fireEventWithMap(
+                              $analytics.fireEventWithMap(
                                   AnalyticsEvents.onBuy1000, params);
                               break;
                           }
@@ -164,7 +163,7 @@ class _InAppContentState extends State<InAppContent> {
                             'level': ctrl.getLevelIndex(),
                             'word': ctrl.focusedWord?.word ?? '',
                           };
-                          analytics.fireEventWithMap(
+                          $analytics.fireEventWithMap(
                               AnalyticsEvents.advOff, params);
                         },
                         child: Stack(

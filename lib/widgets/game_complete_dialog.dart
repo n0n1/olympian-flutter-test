@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../styles.dart';
+import '../core/styles/styles.dart';
 import 'dialog_wrapper.dart';
 
 class GameCompleteDialog extends StatelessWidget {
@@ -10,7 +10,8 @@ class GameCompleteDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dialog(
         elevation: 0,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 12.0),
+        insetPadding:
+            const EdgeInsets.symmetric(horizontal: 10.0, vertical: 12.0),
         clipBehavior: Clip.none,
         backgroundColor: Colors.transparent,
         child: DialogWrapper(
@@ -19,8 +20,13 @@ class GameCompleteDialog extends StatelessWidget {
             height: 150,
             child: Column(
               children: [
-                const Text('Игра пройдена!', style: ThemeText.shopTitle,),
-                const SizedBox(height: 40,),
+                const Text(
+                  'Игра пройдена!',
+                  style: ThemeText.shopTitle,
+                ),
+                const SizedBox(
+                  height: 40,
+                ),
                 GestureDetector(
                   onTap: () {
                     Navigator.of(context).pop();
@@ -35,8 +41,6 @@ class GameCompleteDialog extends StatelessWidget {
               ],
             ),
           ),
-        )
-    );
+        ));
   }
-
 }

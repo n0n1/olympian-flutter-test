@@ -9,19 +9,25 @@ import '../config/config.dart';
 import '../models/config_model.dart';
 
 class ConfigService {
-  static final ConfigService _singleton = ConfigService._internal();
   late FirebaseRemoteConfig remoteConfig;
   bool isConfigInitialized = false;
   late final ConfigModel appConfig;
+  late FirebaseApp firebaseApp;
 
-  factory ConfigService() {
-    return _singleton;
+  /// TODO: Fixme Config
+  Future<void> _initFirebase() async {
+    try {
+      firebaseApp = await Firebase.initializeApp(
+        options: Config.firebaseOptions,
+      );
+    } catch (error) {
+      firebaseApp = Firebase.app();
+    }
   }
 
-  ConfigService._internal();
-
-  init(FirebaseApp app) async {
-    remoteConfig = FirebaseRemoteConfig.instanceFor(app: app);
+  init() async {
+    await _initFirebase();
+    remoteConfig = FirebaseRemoteConfig.instanceFor(app: firebaseApp);
 
     if (isConfigInitialized) {
       return;
@@ -31,32 +37,37 @@ class ConfigService {
       await remoteConfig.setConfigSettings(
         RemoteConfigSettings(
           fetchTimeout: const Duration(seconds: 10),
-          minimumFetchInterval: kReleaseMode ? const Duration(seconds: 20) : Duration.zero,
+          minimumFetchInterval:
+              kReleaseMode ? const Duration(seconds: 20) : Duration.zero,
         ),
       );
       await remoteConfig.setDefaults(<String, dynamic>{
         'levels': '{ "levels": [] }',
         'forceUseApplePay': true,
-        'config': '{ "configVersion": "1", "ratingMinThreshold": 5, "ratingStep": 2, "startingBalance": 200, "randomHintCost": 25, "wordHintCost": 50, "anyWordCoins": 0, "coupleOfWordsCoins": 1, "entireColumnsCoins": 3, "finalWordOfTheLevelCoins": 8, "advViewCoins": 25, "product100Coins": 100, "product1000Coins": 1000, "product4000Coins": 4000, "product12000Coins": 12000, "advWrongAnswerCount": 4, "advWrongAnswerShowCountStart": 3 }'
+        'config':
+            '{ "configVersion": "1", "ratingMinThreshold": 5, "ratingStep": 2, "startingBalance": 200, "randomHintCost": 25, "wordHintCost": 50, "anyWordCoins": 0, "coupleOfWordsCoins": 1, "entireColumnsCoins": 3, "finalWordOfTheLevelCoins": 8, "advViewCoins": 25, "product100Coins": 100, "product1000Coins": 1000, "product4000Coins": 4000, "product12000Coins": 12000, "advWrongAnswerCount": 4, "advWrongAnswerShowCountStart": 3 }'
       });
       await remoteConfig.fetchAndActivate();
       isConfigInitialized = true;
       getBaseConfig();
     } catch (e) {
+      // TODO: fixme
       // Try again
-      init(app);
+      init();
     }
   }
 
   dynamic getLevels() {
     // should be levels.
-    final levels = remoteConfig.getString(kReleaseMode ? 'levels_development' : 'levels_development');
+    final levels = remoteConfig
+        .getString(kReleaseMode ? 'levels_development' : 'levels_development');
     // final levels = remoteConfig.getString('levels_development');
     return json.decode(levels);
   }
 
   dynamic getPromoCodes() {
-    final codes = remoteConfig.getString(kReleaseMode ? 'promoCodes' : 'promoCodes_development');
+    final codes = remoteConfig
+        .getString(kReleaseMode ? 'promoCodes' : 'promoCodes_development');
     return json.decode(codes);
   }
 
@@ -64,7 +75,7 @@ class ConfigService {
     final isRussia = Platform.localeName == 'ru_RU';
     final forceUseApplePay = remoteConfig.getBool('forceUseApplePay');
 
-    if(forceUseApplePay) {
+    if (forceUseApplePay) {
       return true;
     }
 

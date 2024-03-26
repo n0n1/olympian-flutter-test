@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../core/styles/styles.dart';
 import '../services/analytics_service.dart';
-import '../styles.dart';
+import '../shared.dart';
 import '../viewmodels/game_viewmodel.dart';
 import 'image_button.dart';
 import 'shop_dialog.dart';
@@ -50,7 +50,6 @@ class ScoreBar extends StatelessWidget {
   }
 
   _buildScore(BuildContext ctx) {
-    final analytics = AnalyticsService();
     final coins = ctx.watch<GameViewModel>().coins;
     final levelID = ctx.read<GameViewModel>().getLevelIndex();
 
@@ -69,7 +68,7 @@ class ScoreBar extends StatelessWidget {
             GestureDetector(
               onTap: () {
                 ctx.read<GameViewModel>().tapPlay();
-                analytics.fireEventWithMap(
+                $analytics.fireEventWithMap(
                     AnalyticsEvents.onMonetizationWindowShow, {
                   'level_id': ctx.read<GameViewModel>().activeLevel.id,
                   'level': ctx.read<GameViewModel>().getLevelIndex(),
@@ -83,7 +82,7 @@ class ScoreBar extends StatelessWidget {
                     child: const ShopDialog(),
                   ),
                 ).then((value) {
-                  analytics.fireEventWithMap(
+                  $analytics.fireEventWithMap(
                       AnalyticsEvents.onMonetizationWindowClose, {
                     'level_id': ctx.read<GameViewModel>().activeLevel.id,
                     'level': ctx.read<GameViewModel>().getLevelIndex(),

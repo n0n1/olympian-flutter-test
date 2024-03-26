@@ -4,7 +4,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../styles.dart';
+import '../core/styles/styles.dart';
 
 /// Реклама
 class AdvTimeScreen extends StatefulWidget {
@@ -26,6 +26,7 @@ class _AdvTimeScreenState extends State<AdvTimeScreen> {
       Navigator.pop(context);
       _timer.cancel();
     });
+    super.initState();
   }
 
   @override

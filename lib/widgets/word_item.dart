@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../core/presentation/animations/shake.dart';
+import '../core/styles/styles.dart';
 import '../models/word_model.dart';
-import '../styles.dart';
 import '../utils/ext.dart';
 import '../viewmodels/game_viewmodel.dart';
 import 'image_dialog.dart';
-import 'shake.dart';
 // TODO: fixme;
 // import 'wrong_answer_dialog.dart';
 
@@ -26,10 +26,10 @@ class WordItem extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _WordItemState createState() => _WordItemState();
+  WordItemState createState() => WordItemState();
 }
 
-class _WordItemState extends State<WordItem> {
+class WordItemState extends State<WordItem> {
   late final TextEditingController _textController = TextEditingController();
   late FocusNode _wordFocusNode;
   bool showLeftLeaf = false;

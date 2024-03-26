@@ -1,15 +1,15 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import '../services/analytics_service.dart';
+import 'package:in_app_review/in_app_review.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
-import 'package:in_app_review/in_app_review.dart';
 
-import '../styles.dart';
+import '../core/styles/styles.dart';
+import '../services/analytics_service.dart';
+import '../shared.dart';
+import '../viewmodels/settings_viewmodel.dart';
 import 'dialog_wrapper.dart';
 import 'image_button.dart';
 import 'radio_image.dart';
-import '../viewmodels/settings_viewmodel.dart';
 import 'restart_app.dart';
 
 class SettingsDialog extends StatefulWidget {
@@ -47,7 +47,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
   @override
   Widget build(BuildContext context) {
     final vm = Provider.of<SettingsViewModel>(context);
-    final analytics = AnalyticsService();
 
     return Dialog(
       elevation: 0,
@@ -108,7 +107,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 onTap: () async {
                   if (await inAppReview.isAvailable()) {
                     inAppReview.requestReview();
-                    analytics.fireEvent(AnalyticsEvents.onAppReviewTap);
+                    $analytics.fireEvent(AnalyticsEvents.onAppReviewTap);
                   }
                 },
                 type: ImageButtonType.rate,

@@ -1,17 +1,14 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 
 import '../models/products_model.dart';
-import '../services/payment_service.dart';
+import '../shared.dart';
 
 class PaymentViewModel with ChangeNotifier {
-  final PaymentService _payment = PaymentService();
-
   bool isPaymentInProgress = false;
   bool productsLoading = false;
   String youKassaPaymentToken = '';
@@ -129,7 +126,7 @@ class PaymentViewModel with ChangeNotifier {
     isPaymentInProgress = true;
     notifyListeners();
 
-    youKassaPaymentToken = await _payment.createYouKassaToken(product);
+    youKassaPaymentToken = await $payments.createYouKassaToken(product);
 
     isPaymentInProgress = false;
     notifyListeners();

@@ -1,22 +1,15 @@
 import 'package:hive/hive.dart';
+
 import '../models/level_model.dart';
 import '../models/word_model.dart';
-import 'config_service.dart';
+import '../shared.dart';
 
 const boxName = 'game_box';
 const levelsBoxName = 'levels_box';
 
 class DbService {
-  static final DbService _singleton = DbService._internal();
   late final Box _box;
   late final Box _levelBox;
-  final ConfigService config = ConfigService();
-
-  factory DbService() {
-    return _singleton;
-  }
-
-  DbService._internal();
 
   init() async {
     _levelBox = await Hive.openBox(levelsBoxName);
@@ -26,9 +19,10 @@ class DbService {
 
   initDb() async {
     final version = _box.get('levelsVersion', defaultValue: '0');
-    var data = config.getLevels();
+    var data = $conf.getLevels();
 
-    if (int.tryParse(version) == int.tryParse(data['levelsVersion']) || data['levels'] == null) {
+    if (int.tryParse(version) == int.tryParse(data['levelsVersion']) ||
+        data['levels'] == null) {
       return;
     }
 
@@ -40,7 +34,8 @@ class DbService {
     }
 
     for (final newLevel in newLevels) {
-      final savedLevel = savedLevels.firstWhere((e) => e.id == newLevel.id, orElse: () {
+      final savedLevel =
+          savedLevels.firstWhere((e) => e.id == newLevel.id, orElse: () {
         newLevel.state = _getLevelState(newLevel.id);
         newLevel.data = newLevel.data.map((e) {
           e.state = _getWordState(word: e, level: newLevel);
@@ -54,7 +49,8 @@ class DbService {
       if (newLevel.wordsHash != savedLevel.wordsHash) {
         final index = newLevels.indexOf(newLevel);
 
-        if (savedLevel.state == LevelState.started || savedLevel.state == LevelState.available) {
+        if (savedLevel.state == LevelState.started ||
+            savedLevel.state == LevelState.available) {
           newLevels[index].state = LevelState.available;
         } else {
           newLevels[index].state = savedLevel.state;
@@ -66,7 +62,8 @@ class DbService {
       }
     }
 
-    final activeIndex = newLevels.indexWhere((e) => e.id == _getLastActiveLevelId(savedLevels));
+    final activeIndex =
+        newLevels.indexWhere((e) => e.id == _getLastActiveLevelId(savedLevels));
     if (activeIndex != -1) {
       newLevels.asMap().forEach((index, element) {
         if (index < activeIndex) {
@@ -96,7 +93,10 @@ class DbService {
 
   int _getLastActiveLevelId(List<LevelModel> savedLevels) {
     try {
-      return savedLevels.lastWhere((e) => e.state == LevelState.started || e.state == LevelState.available).id;
+      return savedLevels
+          .lastWhere((e) =>
+              e.state == LevelState.started || e.state == LevelState.available)
+          .id;
     } catch (e) {
       return 100;
     }
@@ -131,7 +131,8 @@ class DbService {
 
   /// @Deprecated
   LevelState _getLevelState(int id) {
-    final result = stateFromString(_box.get('level_${id}_state', defaultValue: 'disabled'));
+    final result = stateFromString(
+        _box.get('level_${id}_state', defaultValue: 'disabled'));
     _box.delete('level_${id}_state');
     return result;
   }
@@ -139,7 +140,8 @@ class DbService {
   /// @Deprecated
   _getWordState({required WordModel word, required LevelModel level}) {
     final wordIndex = level.data.indexOf(word);
-    final result = wordStateFromString(_box.get('word_${level.id}_$wordIndex', defaultValue: 'idle'));
+    final result = wordStateFromString(
+        _box.get('word_${level.id}_$wordIndex', defaultValue: 'idle'));
     _box.delete('word_${level.id}_$wordIndex');
     return result;
   }
@@ -151,7 +153,7 @@ class DbService {
   int getCoins() {
     return _box.get(
       'coins',
-      defaultValue: config.appConfig.startingBalance,
+      defaultValue: $conf.appConfig.startingBalance,
     );
   }
 

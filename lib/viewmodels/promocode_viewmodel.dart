@@ -1,13 +1,7 @@
-import 'package:flutter/foundation.dart';
-
 import '../models/promocode_model.dart';
-import '../services/config_service.dart';
-import '../services/db_service.dart';
+import '../shared.dart';
 
 class PromoCodeViewModel with ChangeNotifier {
-  final _db = DbService();
-  final ConfigService _conf = ConfigService();
-
   final List<PromoCodeModel> _codes = [];
 
   PromoCodeViewModel() {
@@ -15,7 +9,7 @@ class PromoCodeViewModel with ChangeNotifier {
   }
 
   _init() async {
-    var data = _conf.getPromoCodes();
+    var data = $conf.getPromoCodes();
 
     if (data['codes'] != null) {
       data['codes'].forEach((code) {
@@ -26,13 +20,13 @@ class PromoCodeViewModel with ChangeNotifier {
 
   bool checkCode(String code) {
     final codeExist = _codes.any((element) => element.code == code); // true
-    final isApplied = _db.get('code_$code', false);
+    final isApplied = $DB.get('code_$code', false);
 
     if (!codeExist || isApplied) {
       return false;
     }
 
-    _db.put('code_$code', true);
+    $DB.put('code_$code', true);
 
     return true;
   }
