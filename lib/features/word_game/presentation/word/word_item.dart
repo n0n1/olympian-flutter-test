@@ -1,12 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+// ignore_for_file: prefer_relative_imports
 
-import '../../../../core/presentation/animations/shake.dart';
-import '../../../../core/styles/styles.dart';
-import '../../../../core/utils/ext.dart';
-import '../../data/models/word_model.dart';
-import '../dialogs/image_dialog.dart';
-import '../viewmodels/game_viewmodel.dart';
+import 'package:olympian/core/presentation/animations/shake.dart';
+import 'package:olympian/core/styles/styles.dart';
+import 'package:olympian/core/utils/ext.dart';
+import 'package:olympian/features/word_game/data/models/word_model.dart';
+import 'package:olympian/features/word_game/presentation/dialogs/image_dialog.dart';
+
+import '../../../../shared.dart';
+
 // TODO: fixme;
 // import 'wrong_answer_dialog.dart';
 
@@ -41,13 +42,13 @@ class WordItemState extends State<WordItem> {
     _wordFocusNode = FocusNode();
 
     _wordFocusNode.addListener(() {
-      context.read<GameViewModel>().wordFocus(
-            word: widget.word,
-            focus: _wordFocusNode.hasFocus,
-          );
+      $gameVm.wordFocus(
+        word: widget.word,
+        focus: _wordFocusNode.hasFocus,
+      );
 
       if (!_wordFocusNode.hasFocus) {
-        context.read<GameViewModel>().clearActiveWord();
+        $gameVm.clearActiveWord();
       }
     });
   }
@@ -60,7 +61,7 @@ class WordItemState extends State<WordItem> {
   }
 
   wrongAnswer() {
-    final vm = context.read<GameViewModel>();
+    final vm = $gameVm;
     if (vm.showWrongAnswerDialog) {
       vm.showWrongAnswerModalDialog(
           context: context,
@@ -125,7 +126,7 @@ class WordItemState extends State<WordItem> {
                   right: 22,
                   child: GestureDetector(
                     onTap: () {
-                      if (context.read<GameViewModel>().showWrongAnswerDialog) {
+                      if ($gameVm.showWrongAnswerDialog) {
                         wrongAnswer();
                         return;
                       }
@@ -135,7 +136,7 @@ class WordItemState extends State<WordItem> {
                         barrierColor: Colors.black45,
                         builder: (ctx) => ImageDialog(
                           word: widget.word,
-                          vm: context.read<GameViewModel>(),
+                          vm: $gameVm,
                         ),
                       );
                     },
@@ -164,8 +165,7 @@ class WordItemState extends State<WordItem> {
                         ? ThemeText.wordItemCorrect
                         : ThemeText.wordItemInput,
                     onSubmitted: (value) {
-                      final vm = context.read<GameViewModel>();
-                      if (!vm.checkWord(
+                      if (!$gameVm.checkWord(
                               word: widget.word, value: value, ctx: context) &&
                           value.isNotEmpty) {
                         _textController.clear();
@@ -255,7 +255,6 @@ class WordItemState extends State<WordItem> {
   }
 
   _getBgImage(WordModel word, context) {
-    final vm = Provider.of<GameViewModel>(context, listen: false);
     final state = word.state;
 
     if (state == WordState.input) {
@@ -263,7 +262,7 @@ class WordItemState extends State<WordItem> {
     }
 
     if (state == WordState.correct) {
-      if (vm.lastGuessedWord == word.word) {
+      if ($gameVm.lastGuessedWord == word.word) {
         return 'assets/images/word_last_done.png';
       }
       return 'assets/images/word_done.png';

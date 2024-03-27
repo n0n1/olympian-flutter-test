@@ -1,5 +1,3 @@
-import 'package:provider/provider.dart';
-
 import '../../../../core/presentation/image_button.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/styles/styles.dart';
@@ -7,7 +5,7 @@ import '../../../../shared.dart';
 import '../../../payments/presentation/view/shop_dialog.dart';
 import '../viewmodels/game_viewmodel.dart';
 
-class ScoreBar extends StatelessWidget {
+class ScoreBar extends WatchingWidget {
   final bool withPadding;
   final bool showBack;
   final bool showLevel;
@@ -28,6 +26,10 @@ class ScoreBar extends StatelessWidget {
     final padding = withPadding
         ? const EdgeInsets.only(left: 16, right: 16, top: 12)
         : const EdgeInsets.only(top: 12);
+    $gameVm.fetchLevelIndex();
+    final coins = watchPropertyValue<GameViewModel, int>((p0) => p0.coins);
+    final levelID = watchValue<GameViewModel, int>((p0) => p0.levelIndex);
+
     return Container(
       padding: padding,
       width: showLevel ? MediaQuery.of(context).size.width : null,
@@ -43,68 +45,59 @@ class ScoreBar extends StatelessWidget {
               width: 36.0,
               height: 36.0,
             ),
-          _buildScore(context),
+          Row(
+            children: [
+              if (showLevel)
+                Container(
+                  padding: const EdgeInsets.only(bottom: 8, right: 6),
+                  child: Text(
+                    'Уровень  $levelID',
+                    style: ThemeText.levelName,
+                  ),
+                ),
+              Stack(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      $gameVm.playTapAudio();
+                      $analytics.fireEventWithMap(
+                          AnalyticsEvents.onMonetizationWindowShow, {
+                        'level_id': $gameVm.activeLevel.id,
+                        'level': $gameVm.fetchLevelIndex(),
+                        'screen': prevScreen ?? '',
+                      });
+                      showDialog(
+                        context: context,
+                        barrierColor: Colors.black38,
+                        builder: (ctx) => const ShopDialog(),
+                      ).then((value) {
+                        $analytics.fireEventWithMap(
+                            AnalyticsEvents.onMonetizationWindowClose, {
+                          'level_id': $gameVm.activeLevel.id,
+                          'level': $gameVm.fetchLevelIndex(),
+                          'screen': prevScreen ?? '',
+                        });
+                      });
+                    },
+                    child: Image.asset('assets/images/score.png', width: 160),
+                  ),
+                  // Coins
+                  Positioned(
+                    top: 12,
+                    right: 70,
+                    left: 30,
+                    child: Text(
+                      coins.toString(),
+                      textAlign: TextAlign.center,
+                      style: ThemeText.pointsText,
+                    ),
+                  )
+                ],
+              ),
+            ],
+          ),
         ],
       ),
-    );
-  }
-
-  _buildScore(BuildContext ctx) {
-    final coins = ctx.watch<GameViewModel>().coins;
-    final levelID = ctx.read<GameViewModel>().getLevelIndex();
-
-    return Row(
-      children: [
-        if (showLevel)
-          Container(
-            padding: const EdgeInsets.only(bottom: 8, right: 6),
-            child: Text(
-              'Уровень  $levelID',
-              style: ThemeText.levelName,
-            ),
-          ),
-        Stack(
-          children: [
-            GestureDetector(
-              onTap: () {
-                ctx.read<GameViewModel>().tapPlay();
-                $analytics.fireEventWithMap(
-                    AnalyticsEvents.onMonetizationWindowShow, {
-                  'level_id': ctx.read<GameViewModel>().activeLevel.id,
-                  'level': ctx.read<GameViewModel>().getLevelIndex(),
-                  'screen': prevScreen ?? '',
-                });
-                showDialog(
-                  context: ctx,
-                  barrierColor: Colors.black38,
-                  builder: (ctx) => ChangeNotifierProvider<GameViewModel>.value(
-                    value: ctx.read<GameViewModel>(),
-                    child: const ShopDialog(),
-                  ),
-                ).then((value) {
-                  $analytics.fireEventWithMap(
-                      AnalyticsEvents.onMonetizationWindowClose, {
-                    'level_id': ctx.read<GameViewModel>().activeLevel.id,
-                    'level': ctx.read<GameViewModel>().getLevelIndex(),
-                    'screen': prevScreen ?? '',
-                  });
-                });
-              },
-              child: Image.asset('assets/images/score.png', width: 160),
-            ),
-            Positioned(
-              top: 12,
-              right: 70,
-              left: 30,
-              child: Text(
-                coins.toString(),
-                textAlign: TextAlign.center,
-                style: ThemeText.pointsText,
-              ),
-            )
-          ],
-        ),
-      ],
     );
   }
 }

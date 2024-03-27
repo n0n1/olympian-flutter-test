@@ -1,6 +1,7 @@
-import 'package:flutter/foundation.dart';
+// ignore_for_file: prefer_relative_imports
 
-import '../../../../core/utils/format.dart';
+import 'package:flutter/foundation.dart';
+import 'package:olympian/core/utils/format.dart';
 
 enum WordState {
   idle,

@@ -17,7 +17,7 @@ dependencies:
   just_audio: ^0.9.28
   in_app_review: ^2.0.3
   smooth_page_indicator: ^1.0.0+2
-  provider: ^6.0.1
+  
   audio_session: ^0.1.10
   carousel_slider: ^4.0.0
   firebase_core: ^2.5.0

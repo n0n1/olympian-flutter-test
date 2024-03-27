@@ -1,11 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
 import '../../../../core/presentation/base_scaffold.dart';
 import '../../../../core/styles/styles.dart';
+import '../../../../shared.dart';
 import '../../data/models/level_model.dart';
 import '../controls/score_bar.dart';
-import '../viewmodels/game_viewmodel.dart';
 import 'area_screen.dart';
 
 /// Представление для просмотра уровней
@@ -15,7 +12,7 @@ class LevelsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final levels = context.watch<GameViewModel>().levels;
+    final levels = $gameVm.levels;
     return BaseScaffold(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -73,7 +70,7 @@ class LevelItem extends StatelessWidget {
         if (level.state == LevelState.disabled) {
           return;
         }
-        context.read<GameViewModel>().setActiveLevel(level);
+        $gameVm.setActiveLevel(level);
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const AreaScreen()),

@@ -6,11 +6,12 @@ import '../../shared.dart';
 class AudioService {
   final AudioPlayer _player = AudioPlayer();
 
-  init() async {
+  Future<void> init() async {
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration(
       avAudioSessionCategory: AVAudioSessionCategory.soloAmbient,
     ));
+    // GetIt.I.signalReady(this);
   }
 
   _isMicDisabled() {

@@ -1,38 +1,81 @@
-import 'package:flutter/foundation.dart';
+// ignore_for_file: prefer_relative_imports
 
-import '../../../../core/services/analytics_service.dart' show AnalyticsEvents;
-import '../../../../shared.dart' show $analytics, $DB, $audio;
+import 'package:in_app_review/in_app_review.dart';
+import 'package:olympian/core/services/analytics_service.dart'
+    show AnalyticsEvents;
+import 'package:olympian/shared.dart'
+    show $DB, $analytics, $audio, $conf, $gameVm, ValueNotifier;
+import 'package:package_info_plus/package_info_plus.dart';
 
-class SettingsViewModel with ChangeNotifier {
-  int get sound => $DB.get('sound', 1);
-  int get mic => $DB.get('mic', 1);
+class SettingsViewModel {
+  final micEnebled = ValueNotifier<bool>(true);
+  final soundEnabled = ValueNotifier<bool>(true);
+  final appVersion = ValueNotifier<String>('');
+  final buildNumber = ValueNotifier<String>('');
+
+  final InAppReview inAppReview = InAppReview.instance;
+
+  PackageInfo packageInfo = PackageInfo(
+    appName: 'Unknown',
+    packageName: 'Unknown',
+    version: 'Unknown',
+    buildNumber: 'Unknown',
+    buildSignature: 'Unknown',
+    installerStore: 'Unknown',
+  );
+
+  Future<void> fetchPackageInfo() async {
+    packageInfo = await PackageInfo.fromPlatform();
+    appVersion.value = packageInfo.version;
+    buildNumber.value = packageInfo.buildNumber;
+  }
+
+  Future<void> reviewApp() async {
+    if (await inAppReview.isAvailable()) {
+      inAppReview.requestReview();
+      $analytics.fireEvent(AnalyticsEvents.onAppReviewTap);
+    }
+  }
+
+  Future<void> reviewAppOnLevelComplete() async {
+    Future.delayed(const Duration(seconds: 1), () async {
+      if ($gameVm.fetchLevelIndex() > $conf.getRatingMinThreshold() &&
+          $gameVm.fetchLevelIndex() % $conf.getRatingStep() != 0) {
+        await reviewApp();
+      }
+    });
+  }
 
   toggleSound() {
     $audio.playTap();
-    $DB.put('sound', sound == 1 ? 0 : 1);
+    soundEnabled.value = soundEnabled.value ? false : true;
+    $DB.put('sound', soundEnabled.value ? 0 : 1);
     $analytics.fireEvent(
-        sound == 1 ? AnalyticsEvents.onSoundOn : AnalyticsEvents.onSoundOff);
-    notifyListeners();
+      soundEnabled.value
+          ? AnalyticsEvents.onSoundOn
+          : AnalyticsEvents.onSoundOff,
+    );
   }
 
   toggleMic() {
     $audio.playTap();
-    $DB.put('mic', mic == 1 ? 0 : 1);
+    micEnebled.value = micEnebled.value ? false : true;
+    $DB.put('mic', micEnebled.value ? 0 : 1);
     $analytics.fireEvent(
-        mic == 1 ? AnalyticsEvents.onMusicOn : AnalyticsEvents.onMusicOff);
-    notifyListeners();
+      micEnebled.value ? AnalyticsEvents.onMusicOn : AnalyticsEvents.onMusicOff,
+    );
   }
 
-  clear() async {
+  /// Reset Game Data
+  Future<void> clear() async {
     await $DB.clear();
-    notifyListeners();
   }
 
   bool showOnBoarding() {
     return $DB.get('onboarding', true);
   }
 
-  setOnBoardingDone() {
+  void setOnBoardingDone() {
     $DB.put('onboarding', false);
   }
 }

@@ -1,13 +1,10 @@
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/styles/styles.dart';
 import '../../../../shared.dart';
-import '../../../settings/presentation/viewmodels/settings_viewmodel.dart';
 import '../../../word_game/presentation/view/area_screen.dart';
 import '../../../word_game/presentation/view/levels_screen.dart';
-import '../../../word_game/presentation/viewmodels/game_viewmodel.dart';
 
 final List<String> imgList = [
   'assets/images/onboard_1.jpg',
@@ -111,10 +108,9 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
               ),
               onTap: () {
                 Navigator.of(context).pop();
-                Provider.of<SettingsViewModel>(context, listen: false)
-                    .setOnBoardingDone();
+                $settingsVM.setOnBoardingDone();
                 if ((_current + 1) == imgList.length) {
-                  Provider.of<GameViewModel>(context, listen: false).play();
+                  $gameVm.play();
                   $analytics.fireEvent(AnalyticsEvents.onOnboardingFinish);
                   Navigator.push(
                     context,

@@ -1,23 +1,43 @@
-import 'package:flutter/cupertino.dart';
+import '../../../../core/presentation/illustrations/bottom_decoration_gradient.dart';
+import '../../../../core/utils/physics.dart';
+import '../../../../shared.dart';
+import 'area_page_controls.dart';
 
-class BaseAreaBox extends StatefulWidget {
-  const BaseAreaBox({super.key});
+class BaseAreaBox extends StatelessWidget {
+  const BaseAreaBox({
+    super.key,
+    required this.child,
+  });
 
-  @override
-  State<BaseAreaBox> createState() => _BaseAreaBoxState();
-}
-
-class _BaseAreaBoxState extends State<BaseAreaBox> {
-  late final ScrollController scroller;
-
-  @override
-  void initState() {
-    scroller = ScrollController();
-    super.initState();
-  }
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    /// init notifications
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      $notification.init();
+    });
+    return NotificationListener<ScrollEndNotification>(
+      onNotification: (notification) {
+        // TODO: Fixme
+        // $areaVm.widthOffset.value = $areaScroller.offset;
+        return true;
+      },
+      child: Stack(
+        children: [
+          SingleChildScrollView(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              controller: $areaScroller,
+              physics:
+                  CustomScrollPhysics(itemDimension: $areaVm.wordWidth.value),
+              child: child,
+            ),
+          ),
+          const BottomGradient(),
+          const AreaPageControls(),
+        ],
+      ),
+    );
   }
 }

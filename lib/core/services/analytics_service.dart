@@ -6,7 +6,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../config/config.dart';
-import '../../shared.dart' show $DB, $conf, log;
+import '../../shared.dart' show $DB, $conf, GetIt, log;
 
 enum AnalyticsEvents {
   sessionFirstTime,
@@ -56,7 +56,7 @@ class AnalyticsService {
     locationTracking: false,
   );
 
-  init() async {
+  Future<void> init() async {
     analytics.init(Config.amplitudeToken);
     await AppMetrica.activate(_config);
 
@@ -77,6 +77,7 @@ class AnalyticsService {
         'configVersion': $conf.appConfig.configVersion,
       });
     }
+    // GetIt.I.signalReady(this);
   }
 
   void fireEvent(AnalyticsEvents event) {

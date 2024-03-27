@@ -1,29 +1,24 @@
-import 'package:provider/provider.dart';
-
 import '../../../../core/services/analytics_service.dart';
+import '../../../../core/services/config_service.dart';
 import '../../../../core/styles/styles.dart';
 import '../../../../shared.dart';
 import '../../../word_game/presentation/viewmodels/game_viewmodel.dart';
+import '../viewmodels/promocode_viewmodel.dart';
 import 'inapp_content.dart';
 import 'promocodes.dart';
 import 'youkassa_content.dart';
 
-class ShopDialog extends StatefulWidget {
-  final String title;
-
+class ShopDialog extends WatchingWidget {
   const ShopDialog({Key? key, this.title = 'Магазин'}) : super(key: key);
-
-  @override
-  State<ShopDialog> createState() => _ShopDialogState();
-}
-
-class _ShopDialogState extends State<ShopDialog> {
-  var _showPromoCode = false;
-
-  final bool useOnlyApplePay = $conf.getUseOnlyApplePay();
-
+  final String title;
   @override
   Widget build(BuildContext context) {
+    $conf.fetchUseOnlyApplePay();
+    final showPromoCode =
+        watchValue<PromoCodeViewModel, bool>((p0) => p0.showPromoCode);
+    final advSettings = watchValue<GameViewModel, bool>((p0) => p0.advSettings);
+    final bool useOnlyApplePay =
+        watchValue<ConfigService, bool>((p0) => p0.useOnlyApplePay);
     return Stack(
       children: [
         Dialog(
@@ -35,18 +30,18 @@ class _ShopDialogState extends State<ShopDialog> {
           clipBehavior: Clip.none,
           backgroundColor: Colors.transparent,
           child: SizedBox(
-            height: context.watch<GameViewModel>().getAdvSettings() ? 420 : 520,
+            height: advSettings ? 420 : 520,
             child: Stack(
               alignment: AlignmentDirectional.topCenter,
               children: [
-                _showPromoCode
+                showPromoCode
                     ? const PromoCode()
                     : useOnlyApplePay
                         ? InAppContent(
-                            title: widget.title,
+                            title: title,
                           )
                         : YouKassaContent(
-                            title: widget.title,
+                            title: title,
                           ),
                 Positioned(
                   top: 0,
@@ -54,13 +49,11 @@ class _ShopDialogState extends State<ShopDialog> {
                   right: 0,
                   child: GestureDetector(
                     onTap: () {
-                      setState(() {
-                        _showPromoCode = !_showPromoCode;
-                      });
+                      $promoVM.toogleShowPromoCode();
                     },
                     child: Center(
                       child: Text(
-                        _showPromoCode
+                        showPromoCode
                             ? 'У меня нет промокода'
                             : 'У меня есть промокод',
                         style: ThemeText.subTitle.copyWith(
@@ -70,13 +63,13 @@ class _ShopDialogState extends State<ShopDialog> {
                     ),
                   ),
                 ),
-                if (!_showPromoCode)
+                if (!showPromoCode)
                   FutureBuilder(
-                    future: context.watch<GameViewModel>().canShowAd(),
+                    future: $gameVm.canShowAd(),
                     builder: (BuildContext context, AsyncSnapshot snapshot) {
                       if (snapshot.hasData) {
                         if (snapshot.data == false) {
-                          return Container();
+                          return const SizedBox.shrink();
                         }
                         return Positioned(
                           bottom: 0,
@@ -87,7 +80,7 @@ class _ShopDialogState extends State<ShopDialog> {
                               onTap: () async {
                                 $analytics
                                     .fireEvent(AnalyticsEvents.onShowAdvTap);
-                                context.read<GameViewModel>().showAd(() {
+                                $gameVm.showAd(() {
                                   Navigator.of(context).pop();
                                 });
                               },
@@ -100,7 +93,7 @@ class _ShopDialogState extends State<ShopDialog> {
                           ),
                         );
                       }
-                      return Container();
+                      return const SizedBox.shrink();
                     },
                   ),
               ],

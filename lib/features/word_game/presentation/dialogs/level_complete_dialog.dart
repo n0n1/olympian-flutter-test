@@ -1,8 +1,3 @@
-import 'dart:async';
-
-import 'package:in_app_review/in_app_review.dart';
-import 'package:provider/provider.dart';
-
 import '../../../../core/presentation/dialog_wrapper.dart';
 import '../../../../core/presentation/loading_dialog.dart';
 import '../../../../core/services/analytics_service.dart';
@@ -11,57 +6,27 @@ import '../../../../core/utils/ext.dart';
 import '../../../../shared.dart';
 import '../../../payments/data/models/products_model.dart';
 import '../../../payments/presentation/view/youkassa_payment.dart';
-import '../../../payments/presentation/viewmodels/payment_viewmodel.dart';
 import '../viewmodels/game_viewmodel.dart';
 
-class LevelCompleteDialog extends StatefulWidget {
+class LevelCompleteDialog extends StatelessWidget {
   const LevelCompleteDialog({Key? key}) : super(key: key);
 
   @override
-  State<LevelCompleteDialog> createState() => _LevelCompleteDialogState();
-}
-
-class _LevelCompleteDialogState extends State<LevelCompleteDialog> {
-  final InAppReview inAppReview = InAppReview.instance;
-
-  @override
-  void initState() {
-    final vm = context.read<GameViewModel>();
-    $analytics.fireEventWithMap(
-      AnalyticsEvents.onLevelComplete,
-      {
-        'level_id': vm.activeLevel.id,
-        'level': vm.getLevelIndex(),
-      },
-    );
-
-    _showReview();
-
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      await Provider.of<PaymentViewModel>(context, listen: false)
-          .loadProducts();
-    });
-    super.initState();
-  }
-
-  _showReview() {
-    final vm = context.read<GameViewModel>();
-
-    Future.delayed(const Duration(seconds: 1), () async {
-      if (vm.getLevelIndex() > $conf.getRatingMinThreshold() &&
-          vm.getLevelIndex() % $conf.getRatingStep() != 0) {
-        if (await inAppReview.isAvailable()) {
-          inAppReview.requestReview();
-          $analytics.fireEvent(AnalyticsEvents.onAppReviewTap);
-        }
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final paymentVm = context.watch<PaymentViewModel>();
-    final vm = context.watch<GameViewModel>();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      await $paymentVM.loadProducts();
+      $analytics.fireEventWithMap(
+        AnalyticsEvents.onLevelComplete,
+        {
+          'level_id': $gameVm.activeLevel.id,
+          'level': $gameVm.fetchLevelIndex(),
+        },
+      );
+      await $settingsVM.reviewAppOnLevelComplete();
+    });
+
+    $gameVm.fetchAdvSettings();
+    final advSettings = watchValue<GameViewModel, bool>((p0) => p0.advSettings);
 
     return Dialog(
       elevation: 0,
@@ -76,7 +41,7 @@ class _LevelCompleteDialogState extends State<LevelCompleteDialog> {
         showClose: false,
         child: SizedBox(
           width: 246,
-          height: vm.getAdvSettings() ? 396 : 500,
+          height: advSettings ? 396 : 500,
           child: Column(
             children: [
               const Text(
@@ -84,7 +49,7 @@ class _LevelCompleteDialogState extends State<LevelCompleteDialog> {
                 style: ThemeText.mainTitle,
               ),
               Text(
-                'Уровень ${vm.getLevelIndex().toString()} пройден',
+                'Уровень ${$gameVm.fetchLevelIndex().toString()} пройден',
                 style: ThemeText.subTitle,
               ),
               const SizedBox(
@@ -101,7 +66,7 @@ class _LevelCompleteDialogState extends State<LevelCompleteDialog> {
                     left: 0,
                     right: 0,
                     child: Text(
-                      vm.lastGuessedWord.capitalize(),
+                      $gameVm.lastGuessedWord.capitalize(),
                       textAlign: TextAlign.center,
                       style: ThemeText.wordItemCorrect.merge(
                         const TextStyle(
@@ -127,8 +92,8 @@ class _LevelCompleteDialogState extends State<LevelCompleteDialog> {
                     left: 70,
                     right: 10,
                     child: AnimatedCounter(
-                      suffix: '/${vm.activeLevel.data.length}',
-                      count: vm.getAllDoneWords(),
+                      suffix: '/${$gameVm.activeLevel.data.length}',
+                      count: $gameVm.getAllDoneWords(),
                     ),
                   ),
                 ],
@@ -145,7 +110,7 @@ class _LevelCompleteDialogState extends State<LevelCompleteDialog> {
                     right: 10,
                     child: AnimatedCounter(
                       prefix: '+',
-                      count: vm.getCoinsByRound(),
+                      count: $gameVm.getCoinsByRound(),
                     ),
                   ),
                 ],
@@ -160,13 +125,13 @@ class _LevelCompleteDialogState extends State<LevelCompleteDialog> {
                   GestureDetector(
                     onTap: () {
                       Navigator.of(context, rootNavigator: true).pop();
-                      vm.showBanner(context: context);
-                      vm.getNextLevel(context);
+                      $gameVm.showBanner(context: context);
+                      $gameVm.getNextLevel(context);
                       $analytics.fireEventWithMap(
                           AnalyticsEvents.onCompleteNextAction, {
                         'button': 'next_level',
-                        'level_id': vm.activeLevel.id,
-                        'level': vm.getLevelIndex(),
+                        'level_id': $gameVm.activeLevel.id,
+                        'level': $gameVm.fetchLevelIndex(),
                       });
                     },
                     child: Image.asset(
@@ -176,30 +141,26 @@ class _LevelCompleteDialogState extends State<LevelCompleteDialog> {
                   ),
                 ],
               ),
-              if (!vm.getAdvSettings())
+              if (!advSettings)
                 GestureDetector(
                   onTap: () {
                     final params = {
-                      'level_id': vm.activeLevel.id,
-                      'level': vm.getLevelIndex(),
-                      'word': vm.focusedWord?.word ?? '',
+                      'level_id': $gameVm.activeLevel.id,
+                      'level': $gameVm.fetchLevelIndex(),
+                      'word': $gameVm.focusedWord?.word ?? '',
                     };
 
-                    final bool useOnlyApplePay = $conf.getUseOnlyApplePay();
+                    final bool useOnlyApplePay = $conf.fetchUseOnlyApplePay();
                     if (useOnlyApplePay) {
-                      final product =
-                          context.read<PaymentViewModel>().productAdvOff;
                       final closeDialog = showLoadingScreen(context: context);
-                      paymentVm.buyProduct(
-                        product: product!,
+                      $paymentVM.buyProduct(
+                        product: $paymentVM.productAdvOff!,
                         onComplete: (int coins) {
                           closeDialog();
-                          context
-                              .read<GameViewModel>()
-                              .buyPointsComplete(coins);
-                          context.read<GameViewModel>().firePaymentComplete();
+                          $gameVm.buyPointsComplete(coins);
+                          $gameVm.firePaymentComplete();
                           Navigator.of(context, rootNavigator: true).pop();
-                          vm.getNextLevel(context);
+                          $gameVm.getNextLevel(context);
                         },
                         onError: () {
                           closeDialog();
@@ -222,7 +183,7 @@ class _LevelCompleteDialogState extends State<LevelCompleteDialog> {
                               onSuccess: () {
                                 Navigator.of(context, rootNavigator: true)
                                     .pop();
-                                vm.getNextLevel(context);
+                                $gameVm.getNextLevel(context);
                               }),
                         ),
                       );
@@ -240,7 +201,7 @@ class _LevelCompleteDialogState extends State<LevelCompleteDialog> {
                           left: 0,
                           right: 0,
                           child: Text(
-                            paymentVm.productAdvOff?.price ?? '',
+                            $paymentVM.productAdvOff?.price ?? '',
                             textAlign: TextAlign.center,
                             style: ThemeText.priceTitle,
                           ),

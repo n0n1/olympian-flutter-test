@@ -1,10 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../core/presentation/animations/shake.dart';
 import '../../../../core/presentation/image_button.dart';
 import '../../../../core/styles/styles.dart';
+import '../../../../shared.dart';
 import '../../data/models/level_model.dart';
 import '../../data/models/word_model.dart';
 import '../help/help_button.dart';
@@ -32,9 +31,8 @@ class _ImageDialogState extends State<ImageDialog> {
   final _shakeKey = GlobalKey<ShakeAnimationState>();
 
   wrongAnswer() {
-    final vm = context.read<GameViewModel>();
-    if (vm.showWrongAnswerDialog) {
-      vm.showWrongAnswerModalDialog(
+    if ($gameVm.showWrongAnswerDialog) {
+      $gameVm.showWrongAnswerModalDialog(
         context: context,
         onShow: () {
           // Navigator.pop(context);

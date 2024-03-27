@@ -1,14 +1,11 @@
 import '../../../../shared.dart';
 import '../../data/models/promocode_model.dart';
 
-class PromoCodeViewModel with ChangeNotifier {
+class PromoCodeViewModel {
   final List<PromoCodeModel> _codes = [];
+  final showPromoCode = ValueNotifier(false);
 
-  PromoCodeViewModel() {
-    _init();
-  }
-
-  _init() async {
+  init() async {
     var data = $conf.getPromoCodes();
 
     if (data['codes'] != null) {
@@ -33,5 +30,9 @@ class PromoCodeViewModel with ChangeNotifier {
 
   int getCoins(String code) {
     return _codes.firstWhere((element) => element.code == code).coins;
+  }
+
+  void toogleShowPromoCode() {
+    showPromoCode.value = !showPromoCode.value;
   }
 }

@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+// ignore_for_file: prefer_relative_imports
 
-import '../viewmodels/game_viewmodel.dart';
+import 'package:olympian/shared.dart';
 
 class HelpButton extends StatelessWidget {
   final bool word;
@@ -17,10 +16,9 @@ class HelpButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<GameViewModel>();
     final key = GlobalKey<State<Tooltip>>();
 
-    final disabled = vm.isBuy50Disabled() || defaultDisabled;
+    final disabled = $gameVm.isBuy50Disabled() || defaultDisabled;
 
     if (word) {
       return Tooltip(
@@ -33,7 +31,7 @@ class HelpButton extends StatelessWidget {
               tooltip?.ensureTooltipVisible();
               return;
             }
-            vm.buyPrompt50(context);
+            $gameVm.buyPrompt50(context);
           },
           child: Container(
             width: 74,
@@ -45,7 +43,7 @@ class HelpButton extends StatelessWidget {
       );
     }
 
-    final isBuy25Disabled = vm.isBuy25Disabled() || defaultDisabled;
+    final isBuy25Disabled = $gameVm.isBuy25Disabled() || defaultDisabled;
 
     return Tooltip(
       message: helpText ?? 'Перейдите на список слов',
@@ -57,7 +55,7 @@ class HelpButton extends StatelessWidget {
             tooltip?.ensureTooltipVisible();
             return;
           }
-          vm.buyPrompt(context);
+          $gameVm.buyPrompt(context);
         },
         child: Container(
           width: 74,

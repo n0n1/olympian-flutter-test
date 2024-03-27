@@ -1,5 +1,3 @@
-import 'package:provider/provider.dart';
-
 import '../../../../core/presentation/dialog_wrapper.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/styles/styles.dart';
@@ -8,14 +6,15 @@ import '../../../word_game/presentation/viewmodels/game_viewmodel.dart';
 import '../../data/models/products_model.dart';
 import 'youkassa_payment.dart';
 
-class YouKassaContent extends StatelessWidget {
+class YouKassaContent extends StatelessWidget with WatchItMixin {
   final String title;
 
   const YouKassaContent({Key? key, required this.title}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final gameVm = context.watch<GameViewModel>();
+    $gameVm.fetchAdvSettings();
+    final advSettings = watchValue<GameViewModel, bool>((p0) => p0.advSettings);
     return Padding(
       padding: const EdgeInsets.only(top: 40.0),
       child: DialogWrapper(
@@ -26,7 +25,7 @@ class YouKassaContent extends StatelessWidget {
         ),
         child: SizedBox(
           width: 280,
-          height: gameVm.getAdvSettings() ? 210 : 300,
+          height: advSettings ? 210 : 300,
           child: Column(
             children: [
               Text(
@@ -42,17 +41,13 @@ class YouKassaContent extends StatelessWidget {
                       .where((e) => e.id != 'adv_off')
                       .map((e) => _buildProduct(context: context, product: e))
                       .toList(),
-                  if (!gameVm.getAdvSettings())
+                  if (!advSettings)
                     GestureDetector(
                       onTap: () {
                         final params = {
-                          'level_id':
-                              context.read<GameViewModel>().activeLevel.id,
-                          'level':
-                              context.read<GameViewModel>().getLevelIndex(),
-                          'word':
-                              context.read<GameViewModel>().focusedWord?.word ??
-                                  '',
+                          'level_id': $gameVm.activeLevel.id,
+                          'level': $gameVm.fetchLevelIndex(),
+                          'word': $gameVm.focusedWord?.word ?? '',
                         };
 
                         $analytics.fireEventWithMap(
@@ -99,9 +94,9 @@ class YouKassaContent extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         final params = {
-          'level_id': context.read<GameViewModel>().activeLevel.id,
-          'level': context.read<GameViewModel>().getLevelIndex(),
-          'word': context.read<GameViewModel>().focusedWord?.word ?? '',
+          'level_id': $gameVm.activeLevel.id,
+          'level': $gameVm.fetchLevelIndex(),
+          'word': $gameVm.focusedWord?.word ?? '',
         };
 
         switch (product.coins) {

@@ -1,15 +1,12 @@
-import 'package:flutter/foundation.dart';
-import 'package:provider/provider.dart';
-
 import '../../../../core/presentation/base_scaffold.dart';
 import '../../../../core/presentation/illustrations/bottom_decoration_gradient.dart';
 import '../../../../core/utils/physics.dart';
 import '../../../../shared.dart';
 import '../area_kit/area_page_controls.dart';
+import '../area_kit/base_area_box.dart';
+import '../area_kit/section_list_box.dart';
 import '../controls/score_bar.dart';
 import '../help/help_button.dart';
-import '../viewmodels/game_viewmodel.dart';
-import '../word/word_item.dart';
 
 /// Поле игры
 class AreaScreen extends StatelessWidget {
@@ -17,7 +14,6 @@ class AreaScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<GameViewModel>();
     return BaseScaffold(
       showLeaf: true,
       withPadding: false,
@@ -27,13 +23,13 @@ class AreaScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             HelpButton(
-              helpText: vm.isLastWord()
+              helpText: $gameVm.isLastWord()
                   ? 'Открыть случайное слово. Нельзя открыть последнее слово'
                   : 'Открыть случайное слово. Уберите курсор из ячейки',
             ),
             HelpButton(
               word: true,
-              helpText: vm.isLastWord()
+              helpText: $gameVm.isLastWord()
                   ? 'Открыть выбранное слово. Нельзя открыть последнее слово'
                   : 'Открыть выбранное слово. Выберете ячейку',
             ),
@@ -56,9 +52,12 @@ class AreaScreen extends StatelessWidget {
         body: GestureDetector(
           onTap: () {
             FocusScope.of(context).requestFocus(FocusNode());
-            vm.clearActiveWord();
+            $gameVm.clearActiveWord();
           },
-          child: const NestedScroll(),
+          child: const BaseAreaBox(
+            // scroller: ScrollController(),
+            child: SectionList(),
+          ),
         ),
       ),
     );
@@ -83,22 +82,23 @@ class NestedScrollState extends State<NestedScroll> {
   void initState() {
     _scrollCtrl = ScrollController();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      $notification.init(context: context);
+      // TODO: Можно вызывать из любого места
+      $notification.init();
     });
     super.initState();
   }
 
-  _ensureScroll(BuildContext ctx) async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    ctx.read<GameViewModel>().scrollToWidget();
-  }
+  // _ensureScroll(BuildContext ctx) async {
+  //   await Future.delayed(const Duration(milliseconds: 500));
+  //   ctx.read<GameViewModel>().scrollToWidget();
+  // }
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<GameViewModel>();
-    final groups = vm.groups;
+    // final vm = context.watch<GameViewModel>();
+    // final groups = vm.groups;
 
-    _ensureScroll(context);
+    // _ensureScroll(context);
     final advContainerWidth = MediaQuery.of(context).size.width - wordWidth;
 
     return NotificationListener<ScrollEndNotification>(
@@ -117,70 +117,6 @@ class NestedScrollState extends State<NestedScroll> {
               controller: _scrollCtrl,
               child: Row(
                 children: [
-                  ...groups.map((group) {
-                    final index = vm.groups.indexOf(group);
-                    final page = (widthOffset / wordWidth).floor();
-                    if (kDebugMode) {
-                      print('index:$index page:$page');
-                    }
-
-                    var itemCounts = vm.groups[page > 0 ? page : 0].length;
-                    return Container(
-                      height: (itemCounts + 1) * itemHeight,
-                      constraints: BoxConstraints(
-                        minHeight: MediaQuery.of(context).size.height - 70,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ...group.map((word) {
-                            final key =
-                                word == vm.scrollableWord ? dataKey : null;
-                            if (key != null) {
-                              vm.scrollKey = key;
-                            }
-                            final showEndLeaf =
-                                (widthOffset / wordWidth).floor() <= index;
-                            final showStartLeaf =
-                                (widthOffset / wordWidth).floor() == index;
-
-                            return AnimatedBuilder(
-                              animation: _scrollCtrl,
-                              builder: (context, child) {
-                                final page =
-                                    max((widthOffset / wordWidth).floor(), 0);
-                                final position = _recalculateOffset(
-                                  maxItems: groups[page].length,
-                                  depth: word.depth,
-                                );
-
-                                return AnimatedContainer(
-                                  width: wordWidth,
-                                  height: itemHeight,
-                                  duration: const Duration(milliseconds: 150),
-                                  margin: EdgeInsets.only(
-                                    right: 0,
-                                    top: position,
-                                    bottom: position,
-                                  ),
-                                  child: child,
-                                );
-                              },
-                              child: WordItem(
-                                key: key,
-                                word: word,
-                                showEndLeaf: showEndLeaf,
-                                showStartLeaf: showStartLeaf,
-                              ),
-                            );
-                          }).toList(),
-                          Container(
-                            height: 66,
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
                   Container(width: advContainerWidth),
                 ],
               ),
@@ -191,13 +127,5 @@ class NestedScrollState extends State<NestedScroll> {
         ],
       ),
     );
-  }
-
-  double _recalculateOffset({required int maxItems, required int depth}) {
-    final totalItemsHeight = maxItems * itemHeight;
-    final totalDepthHeight = totalItemsHeight - (depth * itemHeight);
-    final offsetValue = max<double>((totalDepthHeight / depth) / 2, 0.0);
-
-    return offsetValue;
   }
 }

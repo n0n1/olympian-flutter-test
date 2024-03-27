@@ -1,18 +1,12 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
-import 'package:provider/provider.dart';
 
 import '../../../config/config.dart';
-import '../../word_game/presentation/viewmodels/game_viewmodel.dart';
+import '../../../shared.dart';
 import '../data/models/notification_model.dart';
 
 class NotificationService {
-  BuildContext? ctx;
-
-  init({required BuildContext context}) {
-    ctx = context;
-
+  init() {
     if (kDebugMode) {
       OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
     }
@@ -30,7 +24,8 @@ class NotificationService {
       if (data.addCoins != 0) {
         OneSignal.User.addTagWithKey(
             NotificationDataKeys.notificationOpen.toString(), true);
-        ctx!.read<GameViewModel>().updateCoins(data.addCoins);
+
+        $gameVm.updateCoins(data.addCoins);
       }
     });
 

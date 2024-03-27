@@ -1,11 +1,8 @@
-import 'package:provider/provider.dart';
-
 import '../../../../core/presentation/dialog_wrapper.dart';
 import '../../../../core/presentation/image_button.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/styles/styles.dart';
 import '../../../../shared.dart';
-import '../viewmodels/game_viewmodel.dart';
 
 class WrongAnswerDialog extends StatefulWidget {
   const WrongAnswerDialog({Key? key}) : super(key: key);
@@ -22,8 +19,6 @@ class _WrongAnswerDialogState extends State<WrongAnswerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<GameViewModel>(context);
-
     return Dialog(
       elevation: 0,
       insetPadding:
@@ -70,7 +65,7 @@ class _WrongAnswerDialogState extends State<WrongAnswerDialog> {
               ),
               ImageButton(
                 onTap: () {
-                  vm.buyAttempt();
+                  $gameVm.buyAttempt();
                   Navigator.of(context).pop();
                 },
                 type: ImageButtonType.spend,
@@ -103,8 +98,8 @@ class _WrongAnswerDialogState extends State<WrongAnswerDialog> {
                       return ImageButton(
                         onTap: () {
                           $analytics.fireEvent(AnalyticsEvents.onShowAdvTap);
-                          vm.showAd(() {
-                            vm.wrongAnswerCount = 0;
+                          $gameVm.showAd(() {
+                            $gameVm.wrongAnswerCount = 0;
                             Navigator.of(context).pop();
                           });
                         },
@@ -136,7 +131,7 @@ class _WrongAnswerDialogState extends State<WrongAnswerDialog> {
                   );
                 },
                 initialData: false,
-                future: vm.canShowAd(),
+                future: $gameVm.canShowAd(),
               )
             ],
           ),

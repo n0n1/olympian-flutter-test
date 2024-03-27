@@ -1,10 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+// ignore_for_file: prefer_relative_imports
 
-import '../../../../core/presentation/dialog_wrapper.dart';
-import '../../../../core/styles/styles.dart';
-import '../../../word_game/presentation/viewmodels/game_viewmodel.dart';
-import '../viewmodels/promocode_viewmodel.dart';
+import 'package:flutter/material.dart';
+import 'package:olympian/core/presentation/dialog_wrapper.dart';
+import 'package:olympian/core/styles/styles.dart';
+import 'package:olympian/shared_bl.dart';
 
 class PromoCode extends StatefulWidget {
   const PromoCode({Key? key}) : super(key: key);
@@ -64,16 +63,12 @@ class _PromoCodeState extends State<PromoCode> {
               ),
               GestureDetector(
                 onTap: () {
-                  final result = context
-                      .read<PromoCodeViewModel>()
-                      .checkCode(fieldController.text);
+                  final result = $promoVM.checkCode(fieldController.text);
 
                   if (result) {
-                    final coins = context
-                        .read<PromoCodeViewModel>()
-                        .getCoins(fieldController.text);
-                    context.read<GameViewModel>().buyPointsComplete(coins);
-                    context.read<GameViewModel>().firePaymentComplete();
+                    final coins = $promoVM.getCoins(fieldController.text);
+                    $gameVm.buyPointsComplete(coins);
+                    $gameVm.firePaymentComplete();
                     Navigator.pop(context);
                   } else {
                     showDialog(

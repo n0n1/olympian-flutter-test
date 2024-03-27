@@ -51,7 +51,9 @@ class ConfigService {
       isConfigInitialized = true;
       getBaseConfig();
     } catch (e) {
-      // TODO: fixme
+      if (kDebugMode) {
+        print(e);
+      }
       // Try again
       init();
     }
@@ -71,7 +73,8 @@ class ConfigService {
     return json.decode(codes);
   }
 
-  bool getUseOnlyApplePay() {
+  final useOnlyApplePay = ValueNotifier<bool>(false);
+  bool fetchUseOnlyApplePay() {
     final isRussia = Platform.localeName == 'ru_RU';
     final forceUseApplePay = remoteConfig.getBool('forceUseApplePay');
 

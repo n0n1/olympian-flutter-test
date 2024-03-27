@@ -1,12 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
-import '../../../word_game/presentation/viewmodels/game_viewmodel.dart';
+import '../../../../shared.dart';
 import '../../data/models/products_model.dart';
-import '../viewmodels/payment_viewmodel.dart';
 
 class YouKassaPayment extends StatefulWidget {
   final ProductItem product;
@@ -41,8 +38,7 @@ class _YouKassaPaymentState extends State<YouKassaPayment> {
       );
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      final t = await Provider.of<PaymentViewModel>(context, listen: false)
-          .createYouKassaToken(widget.product);
+      final t = $paymentVM.createYouKassaToken(widget.product);
 
       _webCtrl.loadFlutterAsset('assets/html/index.html');
       _webCtrl.setNavigationDelegate(NavigationDelegate(
@@ -68,15 +64,15 @@ class _YouKassaPaymentState extends State<YouKassaPayment> {
     super.dispose();
   }
 
-  _paymentSuccess() {
+  void _paymentSuccess() {
     String alertText = widget.product.id == 'adv_off'
         ? 'Реклама отключена'
         : 'Вам начислено ${widget.product.coins} монет';
     if (widget.product.id == 'adv_off') {
-      context.read<GameViewModel>().turnOffAdv();
+      $gameVm.turnOffAdv();
     } else {
-      context.read<GameViewModel>().buyPointsComplete(widget.product.coins);
-      context.read<GameViewModel>().firePaymentComplete();
+      $gameVm.buyPointsComplete(widget.product.coins);
+      $gameVm.firePaymentComplete();
     }
 
     Navigator.of(context).pop();
@@ -104,14 +100,13 @@ class _YouKassaPaymentState extends State<YouKassaPayment> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<PaymentViewModel>();
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         title: const Text('Оплата'),
         backgroundColor: const Color(0xFF43311D),
       ),
-      body: vm.isPaymentInProgress
+      body: $paymentVM.isPaymentInProgress
           ? _buildProgress()
           : WebViewWidget(
               controller: _webCtrl,

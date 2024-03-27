@@ -43,11 +43,7 @@ class GameViewModel with ChangeNotifier {
   // bool get showWrongAnswerDialog => wrongAnswerCount >= maxWrongAnswerCount;
   bool get showWrongAnswerDialog => false;
 
-  GameViewModel() {
-    _init();
-  }
-
-  _init() async {
+  init() async {
     _levels = $DB.getLevels();
 
     // Дефолтный уровень
@@ -66,6 +62,7 @@ class GameViewModel with ChangeNotifier {
 
     _cacheImages();
     _save();
+    // GetIt.I.signalReady(this);
   }
 
   // Проверяет пройден ли уровень
@@ -73,7 +70,7 @@ class GameViewModel with ChangeNotifier {
     final isComplete =
         activeLevel.data.where((e) => e.state != WordState.correct).isEmpty;
     if (isComplete) {
-      if (getLevelIndex() == 1 && !isFirstLevelComplete) {
+      if (fetchLevelIndex() == 1 && !isFirstLevelComplete) {
         isFirstLevelComplete = true;
         $analytics.fireEvent(AnalyticsEvents.activation);
       }
@@ -93,13 +90,17 @@ class GameViewModel with ChangeNotifier {
   }
 
   play() {
-    tapPlay();
-    final index = getLastActiveIndex();
+    playTapAudio();
+    fetchLastActiveLevelIndex();
+    final index = lastActiveLevel.value;
+
     setActiveLevel(index == -1 ? _levels[0] : _levels[index]);
   }
 
-  getLastActiveIndex() {
-    return _levels.indexWhere((l) =>
+  // index of last level
+  final lastActiveLevel = ValueNotifier<int>(0);
+  void fetchLastActiveLevelIndex() {
+    lastActiveLevel.value = _levels.indexWhere((l) =>
         (l.state == LevelState.available || l.state == LevelState.started));
   }
 
@@ -233,7 +234,7 @@ class GameViewModel with ChangeNotifier {
       wrongAnswerCount += 1;
       $analytics.fireEventWithMap(AnalyticsEvents.onWordMistake, {
         'level_id': activeLevel.id,
-        'level': getLevelIndex(),
+        'level': fetchLevelIndex(),
         'value': formatted,
         'word': word.word,
         'wordIndex': activeLevel.data.indexWhere((element) => element == word),
@@ -251,7 +252,7 @@ class GameViewModel with ChangeNotifier {
         AnalyticsEvents.onLevelStart,
         {
           'level_id': activeLevel.id,
-          'level': getLevelIndex(),
+          'level': fetchLevelIndex(),
           'coins': coins,
         },
       );
@@ -264,7 +265,7 @@ class GameViewModel with ChangeNotifier {
 
   showBanner({required BuildContext context}) {
     // Показ баннера
-    if (getLevelIndex() > 1) {
+    if (fetchLevelIndex() > 1) {
       Navigator.of(context).push(
         PageRouteBuilder(
           pageBuilder: (context, animation1, animation2) =>
@@ -281,8 +282,9 @@ class GameViewModel with ChangeNotifier {
     // _ad.turnOffAdd();
   }
 
-  bool getAdvSettings() {
-    return $DB.getAdvSetting();
+  final advSettings = ValueNotifier<bool>(false);
+  void fetchAdvSettings() {
+    advSettings.value = $DB.getAdvSetting();
   }
 
   void _addWordLeaf(WordModel word, int wordIndex) {
@@ -351,7 +353,7 @@ class GameViewModel with ChangeNotifier {
       {
         'coins': coins,
         'level_id': activeLevel.id,
-        'level': getLevelIndex(),
+        'level': fetchLevelIndex(),
       },
     );
   }
@@ -362,7 +364,7 @@ class GameViewModel with ChangeNotifier {
     if (coins < $conf.appConfig.randomHintCost) {
       $analytics.fireEventWithMap(AnalyticsEvents.onMonetizationNoEnoughScore, {
         'level_id': activeLevel.id,
-        'level': getLevelIndex(),
+        'level': fetchLevelIndex(),
         'screen': 'HelpScreen25',
       });
       showDialog(
@@ -376,7 +378,7 @@ class GameViewModel with ChangeNotifier {
           AnalyticsEvents.onMonetizationWindowClose,
           {
             'level_id': activeLevel.id,
-            'level': getLevelIndex(),
+            'level': fetchLevelIndex(),
             'screen': 'HelpScreen25',
           },
         ),
@@ -427,7 +429,7 @@ class GameViewModel with ChangeNotifier {
         AnalyticsEvents.onLevelStart,
         {
           'level_id': activeLevel.id,
-          'level': getLevelIndex(),
+          'level': fetchLevelIndex(),
           'coins': coins,
         },
       );
@@ -447,7 +449,7 @@ class GameViewModel with ChangeNotifier {
 
     $analytics.fireEventWithMap(AnalyticsEvents.onHintRandomWord, {
       'level_id': activeLevel.id,
-      'level': getLevelIndex(),
+      'level': fetchLevelIndex(),
       'word': randWord.word,
       'wordIndex': wordIndex,
     });
@@ -474,13 +476,13 @@ class GameViewModel with ChangeNotifier {
         (value) => $analytics
             .fireEventWithMap(AnalyticsEvents.onMonetizationWindowClose, {
           'level_id': activeLevel.id,
-          'level': getLevelIndex(),
+          'level': fetchLevelIndex(),
           'screen': 'HelpScreen50',
         }),
       );
       $analytics.fireEventWithMap(AnalyticsEvents.onMonetizationNoEnoughScore, {
         'level_id': activeLevel.id,
-        'level': getLevelIndex(),
+        'level': fetchLevelIndex(),
         'screen': 'HelpScreen50',
       });
       return;
@@ -505,7 +507,7 @@ class GameViewModel with ChangeNotifier {
 
     $analytics.fireEventWithMap(AnalyticsEvents.onHintOpenWord, {
       'level_id': activeLevel.id,
-      'level': getLevelIndex(),
+      'level': fetchLevelIndex(),
       'word': focusedWord!.word,
       'wordIndex': wordIndex,
     });
@@ -516,7 +518,7 @@ class GameViewModel with ChangeNotifier {
         AnalyticsEvents.onLevelStart,
         {
           'level_id': activeLevel.id,
-          'level': getLevelIndex(),
+          'level': fetchLevelIndex(),
           'coins': coins,
         },
       );
@@ -607,8 +609,11 @@ class GameViewModel with ChangeNotifier {
     }
   }
 
-  int getLevelIndex() {
-    return _levels.indexWhere((e) => e.id == activeLevel.id) + 1;
+  final levelIndex = ValueNotifier<int>(0);
+
+  int fetchLevelIndex() {
+    levelIndex.value = _levels.indexWhere((e) => e.id == activeLevel.id) + 1;
+    return levelIndex.value;
   }
 
   getAllDoneWords() {
@@ -619,7 +624,8 @@ class GameViewModel with ChangeNotifier {
 
   getCoinsByRound() => coinsByRound;
 
-  tapPlay() {
+  /// Play audio on tap
+  void playTapAudio() {
     $audio.playTap();
   }
 
@@ -634,7 +640,7 @@ class GameViewModel with ChangeNotifier {
 
     OneSignal.User.addTags({
       NotificationDataKeys.notificationActiveLevel: activeLevel.id,
-      NotificationDataKeys.notificationAdvSettings: getAdvSettings(),
+      NotificationDataKeys.notificationAdvSettings: advSettings.value,
       NotificationDataKeys.notificationCoins: coins,
     });
   }

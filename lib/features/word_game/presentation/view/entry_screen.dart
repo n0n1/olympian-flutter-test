@@ -1,33 +1,27 @@
-import 'package:provider/provider.dart';
+// ignore_for_file: prefer_relative_imports
 
-import '../../../../core/presentation/base_scaffold.dart';
-import '../../../../core/presentation/image_button.dart';
-import '../../../../core/services/analytics_service.dart';
-import '../../../../core/styles/styles.dart';
-import '../../../../shared.dart';
-import '../../../onboarding/presentation/view/onboarding_screen.dart';
-import '../../../settings/presentation/view/settings_dialog.dart';
-import '../../../settings/presentation/viewmodels/settings_viewmodel.dart';
-import '../controls/score_bar.dart';
+import 'package:olympian/core/presentation/app_logo.dart';
+import 'package:olympian/core/presentation/base_scaffold.dart';
+import 'package:olympian/core/presentation/image_button.dart';
+import 'package:olympian/core/services/analytics_service.dart';
+import 'package:olympian/core/styles/styles.dart';
+import 'package:olympian/features/onboarding/presentation/view/onboarding_screen.dart';
+import 'package:olympian/features/settings/presentation/view/settings_dialog.dart';
+import 'package:olympian/features/word_game/presentation/controls/score_bar.dart';
+import 'package:olympian/shared.dart';
+
 import '../viewmodels/game_viewmodel.dart';
 import 'area_screen.dart';
 import 'levels_screen.dart';
 
 /// Меню игры / Точка входа
-class EntryScreen extends StatefulWidget {
+class EntryScreen extends StatelessWidget with WatchItMixin {
   const EntryScreen({Key? key}) : super(key: key);
 
   @override
-  State<EntryScreen> createState() => _EntryScreenState();
-}
-
-class _EntryScreenState extends State<EntryScreen> {
-  @override
-  void initState() {
-    super.initState();
+  Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      final vm = Provider.of<SettingsViewModel>(context, listen: false);
-      if (vm.showOnBoarding()) {
+      if ($settingsVM.showOnBoarding()) {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -35,105 +29,134 @@ class _EntryScreenState extends State<EntryScreen> {
         );
       }
     });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return BaseScaffold(
+    return const BaseScaffold(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ScoreBar(
-                  showBack: false,
-                  prevScreen: 'Home',
-                ),
-              ],
-            ),
-          ),
-          Container(
-            margin: const EdgeInsets.only(top: 60),
-            child: Image.asset('assets/images/logo.png'),
-          ),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 40),
-              child: Consumer<GameViewModel>(
-                builder: (_, vm, child) {
-                  return ImageButton(
-                    onTap: () {
-                      vm.play();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const LevelsScreen()),
-                      );
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const AreaScreen()),
-                      );
-                      $analytics.fireEvent(AnalyticsEvents.onPlayTap);
-                    },
-                    type: ImageButtonType.play,
-                    width: 230.0,
-                    height: 230.0,
-                  );
-                },
-              ),
-            ),
-          ),
-          Center(
-            child: Text(
-              'Продолжить: ${context.watch<GameViewModel>().getLastActiveIndex() + 1} уровень',
-              style: ThemeText.mainLabel,
-            ),
-          ),
-          const SizedBox(
-            height: 30,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ImageButton(
-                onTap: () {
-                  context.read<GameViewModel>().tapPlay();
-                  $analytics.fireEvent(AnalyticsEvents.onLevelsTap);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const LevelsScreen()),
-                  );
-                },
-                type: ImageButtonType.stats,
-                height: 70.0,
-                width: 70.0,
-              ),
-              const SizedBox(
-                width: 20,
-              ),
-              ImageButton(
-                onTap: () {
-                  context.read<GameViewModel>().tapPlay();
-                  $analytics.fireEvent(AnalyticsEvents.onSettingsTap);
-                  showDialog(
-                    context: context,
-                    barrierColor: Colors.black38,
-                    builder: (ctx) =>
-                        ChangeNotifierProvider<SettingsViewModel>.value(
-                      value: context.read<SettingsViewModel>(),
-                      child: const SettingsDialog(),
-                    ),
-                  );
-                },
-                height: 70.0,
-                width: 70.0,
-              ),
-            ],
-          )
+          ScoreBarLayout(),
+          AppLogo(),
+          PlayButton(),
+          NextLevelView(),
+          Gap(30),
+          LevelScreenButton()
         ],
+      ),
+    );
+  }
+}
+
+class ScoreBarLayout extends StatelessWidget {
+  const ScoreBarLayout({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.only(top: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          ScoreBar(
+            showBack: false,
+            prevScreen: 'Home',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class PlayButton extends StatelessWidget {
+  const PlayButton({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.only(right: 40),
+        child: ImageButton(
+          onTap: () {
+            $gameVm.play();
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const LevelsScreen()),
+            );
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AreaScreen()),
+            );
+            $analytics.fireEvent(AnalyticsEvents.onPlayTap);
+          },
+          type: ImageButtonType.play,
+          width: 230.0,
+          height: 230.0,
+        ),
+      ),
+    );
+  }
+}
+
+class LevelScreenButton extends StatelessWidget {
+  const LevelScreenButton({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ImageButton(
+          onTap: () {
+            $gameVm.playTapAudio();
+            $analytics.fireEvent(AnalyticsEvents.onLevelsTap);
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const LevelsScreen()),
+            );
+          },
+          type: ImageButtonType.stats,
+          height: 70.0,
+          width: 70.0,
+        ),
+        const Gap(20),
+        // Settings Dialog
+        ImageButton(
+          onTap: () {
+            $gameVm.playTapAudio();
+            $analytics.fireEvent(AnalyticsEvents.onSettingsTap);
+            showDialog(
+                context: context,
+                barrierColor: Colors.black38,
+                builder: (_) => const SettingsDialog());
+          },
+          height: 70.0,
+          width: 70.0,
+        ),
+      ],
+    );
+  }
+}
+
+class NextLevelView extends StatelessWidget with WatchItMixin {
+  const NextLevelView({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    $gameVm.fetchLastActiveLevelIndex();
+    final lastActiveLevel =
+        watchValue<GameViewModel, int>((vm) => vm.lastActiveLevel);
+
+    return Center(
+      child: Text(
+        'Продолжить: ${lastActiveLevel + 1} уровень',
+        style: ThemeText.mainLabel,
       ),
     );
   }

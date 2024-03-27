@@ -1,5 +1,3 @@
-import 'package:provider/provider.dart';
-
 import '../../../../core/presentation/dialog_wrapper.dart';
 import '../../../../core/presentation/loading_dialog.dart';
 import '../../../../core/services/analytics_service.dart';
@@ -7,31 +5,18 @@ import '../../../../core/styles/styles.dart';
 import '../../../../shared.dart';
 import '../../../word_game/presentation/viewmodels/game_viewmodel.dart';
 import '../../data/models/products_model.dart';
-import '../viewmodels/payment_viewmodel.dart';
 
 /// Внутренние покупки
-class InAppContent extends StatefulWidget {
+class InAppContent extends StatelessWidget with WatchItMixin {
   final String title;
   const InAppContent({Key? key, required this.title}) : super(key: key);
 
   @override
-  State<InAppContent> createState() => _InAppContentState();
-}
-
-class _InAppContentState extends State<InAppContent> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      await Provider.of<PaymentViewModel>(context, listen: false)
-          .loadProducts();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final vm = context.watch<PaymentViewModel>();
-    final gameVm = context.watch<GameViewModel>();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      await $paymentVM.loadProducts();
+    });
+    final advSettings = watchValue<GameViewModel, bool>((p0) => p0.advSettings);
     return Padding(
       padding: const EdgeInsets.only(top: 40.0),
       child: DialogWrapper(
@@ -42,17 +27,17 @@ class _InAppContentState extends State<InAppContent> {
         ),
         child: SizedBox(
           width: 280,
-          height: !gameVm.getAdvSettings() ? 300 : 220,
+          height: !advSettings ? 300 : 220,
           child: Column(
             children: [
               Text(
-                widget.title,
+                title,
                 style: ThemeText.shopTitle,
               ),
               const SizedBox(
                 height: 20,
               ),
-              if (vm.productsLoading)
+              if ($paymentVM.productsLoading)
                 const Column(
                   children: [
                     SizedBox(
@@ -61,40 +46,33 @@ class _InAppContentState extends State<InAppContent> {
                     CircularProgressIndicator(),
                   ],
                 ),
-              if (!vm.productsLoading)
+              if (!$paymentVM.productsLoading)
                 Wrap(
                   children: [
-                    ...context
-                        .read<PaymentViewModel>()
-                        .products
+                    ...$paymentVM.products
                         .where((e) => e.id != 'adv_off')
                         .map((product) {
                       return GestureDetector(
                         onTap: () {
                           final closeDialog =
                               showLoadingScreen(context: context);
-                          vm.buyProduct(
+                          $paymentVM.buyProduct(
                             product: product,
                             onComplete: (int coins) {
                               closeDialog();
-                              context
-                                  .read<GameViewModel>()
-                                  .buyPointsComplete(coins);
-                              context
-                                  .read<GameViewModel>()
-                                  .firePaymentComplete();
+                              $gameVm.buyPointsComplete(coins);
+                              $gameVm.firePaymentComplete();
                             },
                             onError: () {
                               closeDialog();
                             },
                             context: context,
                           );
-                          final ctrl = context.watch<GameViewModel>();
 
                           final params = {
-                            'level_id': ctrl.activeLevel.id,
-                            'level': ctrl.getLevelIndex(),
-                            'word': ctrl.focusedWord?.word ?? '',
+                            'level_id': $gameVm.activeLevel.id,
+                            'level': $gameVm.fetchLevelIndex(),
+                            'word': $gameVm.focusedWord?.word ?? '',
                           };
 
                           switch (product.id) {
@@ -138,29 +116,29 @@ class _InAppContentState extends State<InAppContent> {
                         ),
                       );
                     }).toList(),
-                    if (!gameVm.getAdvSettings())
+                    if (!advSettings)
                       GestureDetector(
                         onTap: () {
-                          final product =
-                              context.read<PaymentViewModel>().productAdvOff;
+                          final product = $paymentVM.productAdvOff;
                           final closeDialog =
                               showLoadingScreen(context: context);
-                          vm.buyProduct(
+                          $paymentVM.buyProduct(
                             product: product!,
                             onComplete: (int coins) {
                               closeDialog();
-                              context.read<GameViewModel>().turnOffAdv();
+                              $gameVm.turnOffAdv();
                             },
                             onError: () {
                               closeDialog();
                             },
                             context: context,
                           );
-                          final ctrl = context.watch<GameViewModel>();
+
+                          final ctrl = $gameVm;
 
                           final params = {
                             'level_id': ctrl.activeLevel.id,
-                            'level': ctrl.getLevelIndex(),
+                            'level': ctrl.fetchLevelIndex(),
                             'word': ctrl.focusedWord?.word ?? '',
                           };
                           $analytics.fireEventWithMap(
@@ -176,7 +154,7 @@ class _InAppContentState extends State<InAppContent> {
                               left: 0,
                               right: 0,
                               child: Text(
-                                vm.productAdvOff?.price ?? '',
+                                $paymentVM.productAdvOff?.price ?? '',
                                 textAlign: TextAlign.center,
                                 style: ThemeText.priceTitle,
                               ),
