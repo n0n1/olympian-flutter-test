@@ -5,6 +5,8 @@ import '../../../../shared.dart';
 import '../area_kit/area_page_controls.dart';
 import '../area_kit/base_area_box.dart';
 import '../area_kit/section_list_box.dart';
+import '../controls/back_button.dart';
+import '../controls/current_level_vide.dart';
 import '../controls/score_bar.dart';
 import '../help/help_button.dart';
 
@@ -42,10 +44,17 @@ class AreaScreen extends StatelessWidget {
           automaticallyImplyLeading: false,
           elevation: 0,
           toolbarHeight: 76.0,
-          flexibleSpace: const ScoreBar(
-            withPadding: true,
-            showLevel: true,
-            prevScreen: 'Level',
+          flexibleSpace: const Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              CBackButton(),
+              Spacer(),
+              CurretLevelView(),
+              Spacer(),
+              ScoreView(
+                withPadding: true,
+              ),
+            ],
           ),
           backgroundColor: Colors.transparent,
         ),

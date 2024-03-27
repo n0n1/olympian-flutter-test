@@ -58,10 +58,7 @@ class ScoreBarLayout extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          ScoreBar(
-            showBack: false,
-            prevScreen: 'Home',
-          ),
+          ScoreView(),
         ],
       ),
     );

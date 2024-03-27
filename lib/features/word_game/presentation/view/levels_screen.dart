@@ -2,6 +2,7 @@ import '../../../../core/presentation/base_scaffold.dart';
 import '../../../../core/styles/styles.dart';
 import '../../../../shared.dart';
 import '../../data/models/level_model.dart';
+import '../controls/back_button.dart';
 import '../controls/score_bar.dart';
 import 'area_screen.dart';
 
@@ -25,8 +26,12 @@ class LevelsScreen extends WatchingWidget {
               elevation: 0,
               floating: true,
               expandedHeight: 90.0,
-              flexibleSpace: ScoreBar(
-                prevScreen: 'Levels',
+              flexibleSpace: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CBackButton(),
+                  ScoreView(),
+                ],
               ),
               backgroundColor: Colors.transparent,
             ),

@@ -25,7 +25,7 @@ class GameViewModel {
   late LevelModel activeLevel; // current level
   final levelIndex = ValueNotifier<int>(0);
   // index of last level
-  final lastActiveLevel = ValueNotifier<int>(-1);
+  final lastActiveLevel = ValueNotifier<int>(0);
 
   bool isFirstLevelComplete = false;
 
