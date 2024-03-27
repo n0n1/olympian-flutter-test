@@ -25,7 +25,7 @@ class NotificationService {
         OneSignal.User.addTagWithKey(
             NotificationDataKeys.notificationOpen.toString(), true);
 
-        $gameVm.updateCoins(data.addCoins);
+        $gameVm.addCoins(data.addCoins);
       }
     });
 

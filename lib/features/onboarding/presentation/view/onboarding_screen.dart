@@ -110,7 +110,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                 Navigator.of(context).pop();
                 $settingsVM.setOnBoardingDone();
                 if ((_current + 1) == imgList.length) {
-                  $gameVm.play();
+                  $gameVm.startPlayGame();
                   $analytics.fireEvent(AnalyticsEvents.onOnboardingFinish);
                   Navigator.push(
                     context,

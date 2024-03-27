@@ -7,7 +7,7 @@ import 'area_screen.dart';
 
 /// Представление для просмотра уровней
 ///
-class LevelsScreen extends StatelessWidget {
+class LevelsScreen extends WatchingWidget {
   const LevelsScreen({Key? key}) : super(key: key);
 
   @override

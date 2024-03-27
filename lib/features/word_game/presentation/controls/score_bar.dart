@@ -26,8 +26,8 @@ class ScoreBar extends WatchingWidget {
     final padding = withPadding
         ? const EdgeInsets.only(left: 16, right: 16, top: 12)
         : const EdgeInsets.only(top: 12);
-    $gameVm.fetchLevelIndex();
-    final coins = watchPropertyValue<GameViewModel, int>((p0) => p0.coins);
+    // $gameVm.fetchLevelIndex();
+    final coins = watchValue<GameViewModel, int>((p0) => p0.coins);
     final levelID = watchValue<GameViewModel, int>((p0) => p0.levelIndex);
 
     return Container(
@@ -63,7 +63,7 @@ class ScoreBar extends WatchingWidget {
                       $analytics.fireEventWithMap(
                           AnalyticsEvents.onMonetizationWindowShow, {
                         'level_id': $gameVm.activeLevel.id,
-                        'level': $gameVm.fetchLevelIndex(),
+                        'level': levelID,
                         'screen': prevScreen ?? '',
                       });
                       showDialog(
@@ -74,7 +74,7 @@ class ScoreBar extends WatchingWidget {
                         $analytics.fireEventWithMap(
                             AnalyticsEvents.onMonetizationWindowClose, {
                           'level_id': $gameVm.activeLevel.id,
-                          'level': $gameVm.fetchLevelIndex(),
+                          'level': levelID,
                           'screen': prevScreen ?? '',
                         });
                       });

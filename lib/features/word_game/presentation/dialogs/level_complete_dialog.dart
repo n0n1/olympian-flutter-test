@@ -8,11 +8,13 @@ import '../../../payments/data/models/products_model.dart';
 import '../../../payments/presentation/view/youkassa_payment.dart';
 import '../viewmodels/game_viewmodel.dart';
 
-class LevelCompleteDialog extends StatelessWidget {
+class LevelCompleteDialog extends WatchingWidget {
   const LevelCompleteDialog({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final levelIndex = watchValue<GameViewModel, int>((p0) => p0.levelIndex);
+    final advSettings = watchValue<GameViewModel, bool>((p0) => p0.advSettings);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       await $paymentVM.loadProducts();
       $analytics.fireEventWithMap(
@@ -26,7 +28,7 @@ class LevelCompleteDialog extends StatelessWidget {
     });
 
     $gameVm.fetchAdvSettings();
-    final advSettings = watchValue<GameViewModel, bool>((p0) => p0.advSettings);
+    $gameVm.fetchLevelIndex();
 
     return Dialog(
       elevation: 0,
@@ -49,164 +51,168 @@ class LevelCompleteDialog extends StatelessWidget {
                 style: ThemeText.mainTitle,
               ),
               Text(
-                'Уровень ${$gameVm.fetchLevelIndex().toString()} пройден',
+                'Уровень $levelIndex пройден',
                 style: ThemeText.subTitle,
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              Stack(
-                children: [
-                  Image.asset(
-                    'assets/images/word_done.png',
-                    width: 180,
-                  ),
-                  Positioned(
-                    top: 25,
-                    left: 0,
-                    right: 0,
-                    child: Text(
-                      $gameVm.lastGuessedWord.capitalize(),
-                      textAlign: TextAlign.center,
-                      style: ThemeText.wordItemCorrect.merge(
-                        const TextStyle(
-                          fontSize: 22,
-                          color: Color(0xFF404040),
+              const Gap(10),
+              Flexible(
+                child: Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/word_done.png',
+                      width: 180,
+                    ),
+                    Positioned(
+                      top: 25,
+                      left: 0,
+                      right: 0,
+                      child: Text(
+                        $gameVm.lastGuessedWord.capitalize(),
+                        textAlign: TextAlign.center,
+                        style: ThemeText.wordItemCorrect.merge(
+                          const TextStyle(
+                            fontSize: 22,
+                            color: Color(0xFF404040),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              const SizedBox(
-                height: 12,
-              ),
-              Stack(
-                children: [
-                  Image.asset(
-                    'assets/images/complete_tree.png',
-                    width: 150,
-                  ),
-                  Positioned(
-                    top: 20,
-                    left: 70,
-                    right: 10,
-                    child: AnimatedCounter(
-                      suffix: '/${$gameVm.activeLevel.data.length}',
-                      count: $gameVm.getAllDoneWords(),
+              const Gap(12),
+              Flexible(
+                child: Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/complete_tree.png',
+                      width: 150,
                     ),
-                  ),
-                ],
-              ),
-              Stack(
-                children: [
-                  Image.asset(
-                    'assets/images/complete_leaf.png',
-                    width: 150,
-                  ),
-                  Positioned(
-                    top: 20,
-                    left: 70,
-                    right: 10,
-                    child: AnimatedCounter(
-                      prefix: '+',
-                      count: $gameVm.getCoinsByRound(),
+                    Positioned(
+                      top: 20,
+                      left: 70,
+                      right: 10,
+                      child: AnimatedCounter(
+                        suffix: '/${$gameVm.activeLevel.data.length}',
+                        count: $gameVm.getAllDoneWords(),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              const SizedBox(
-                height: 20,
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context, rootNavigator: true).pop();
-                      $gameVm.showBanner(context: context);
-                      $gameVm.getNextLevel(context);
-                      $analytics.fireEventWithMap(
-                          AnalyticsEvents.onCompleteNextAction, {
-                        'button': 'next_level',
-                        'level_id': $gameVm.activeLevel.id,
-                        'level': $gameVm.fetchLevelIndex(),
-                      });
-                    },
-                    child: Image.asset(
-                      'assets/images/next_level.png',
-                      width: 176.0,
+              Flexible(
+                child: Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/complete_leaf.png',
+                      width: 150,
                     ),
-                  ),
-                ],
+                    Positioned(
+                      top: 20,
+                      left: 70,
+                      right: 10,
+                      child: AnimatedCounter(
+                        prefix: '+',
+                        count: $gameVm.coinsByRound.value,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Gap(20),
+              Flexible(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context, rootNavigator: true).pop();
+                        $gameVm.showBanner(context: context);
+                        $gameVm.getNextLevel(context);
+                        $analytics.fireEventWithMap(
+                            AnalyticsEvents.onCompleteNextAction, {
+                          'button': 'next_level',
+                          'level_id': $gameVm.activeLevel.id,
+                          'level': levelIndex,
+                        });
+                      },
+                      child: Image.asset(
+                        'assets/images/next_level.png',
+                        width: 176.0,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               if (!advSettings)
-                GestureDetector(
-                  onTap: () {
-                    final params = {
-                      'level_id': $gameVm.activeLevel.id,
-                      'level': $gameVm.fetchLevelIndex(),
-                      'word': $gameVm.focusedWord?.word ?? '',
-                    };
+                Flexible(
+                  child: GestureDetector(
+                    onTap: () {
+                      final params = {
+                        'level_id': $gameVm.activeLevel.id,
+                        'level': levelIndex,
+                        'word': $gameVm.focusedWord?.word ?? '',
+                      };
 
-                    final bool useOnlyApplePay = $conf.fetchUseOnlyApplePay();
-                    if (useOnlyApplePay) {
-                      final closeDialog = showLoadingScreen(context: context);
-                      $paymentVM.buyProduct(
-                        product: $paymentVM.productAdvOff!,
-                        onComplete: (int coins) {
-                          closeDialog();
-                          $gameVm.buyPointsComplete(coins);
-                          $gameVm.firePaymentComplete();
-                          Navigator.of(context, rootNavigator: true).pop();
-                          $gameVm.getNextLevel(context);
-                        },
-                        onError: () {
-                          closeDialog();
-                        },
-                        context: context,
-                      );
-                      $analytics.fireEventWithMap(
-                          AnalyticsEvents.advOff, params);
-                    } else {
-                      $analytics.fireEventWithMap(
-                          AnalyticsEvents.advOff, params);
+                      final bool useOnlyApplePay = $conf.fetchUseOnlyApplePay();
+                      if (useOnlyApplePay) {
+                        final closeDialog = showLoadingScreen(context: context);
+                        $paymentVM.buyProduct(
+                          product: $paymentVM.productAdvOff!,
+                          onComplete: (int coins) {
+                            closeDialog();
+                            $gameVm.buyPointsComplete(coins);
+                            $gameVm.firePaymentComplete();
+                            Navigator.of(context, rootNavigator: true).pop();
+                            $gameVm.getNextLevel(context);
+                          },
+                          onError: () {
+                            closeDialog();
+                          },
+                          context: context,
+                        );
+                        $analytics.fireEventWithMap(
+                            AnalyticsEvents.advOff, params);
+                      } else {
+                        $analytics.fireEventWithMap(
+                            AnalyticsEvents.advOff, params);
 
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          fullscreenDialog: true,
-                          builder: (context) => YouKassaPayment(
-                              product: availableProducts
-                                  .firstWhere((e) => e.id == 'adv_off'),
-                              onSuccess: () {
-                                Navigator.of(context, rootNavigator: true)
-                                    .pop();
-                                $gameVm.getNextLevel(context);
-                              }),
-                        ),
-                      );
-                    }
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Stack(
-                      children: [
-                        Image.asset(
-                          'assets/images/turn_off_add.png',
-                        ),
-                        Positioned(
-                          bottom: 26,
-                          left: 0,
-                          right: 0,
-                          child: Text(
-                            $paymentVM.productAdvOff?.price ?? '',
-                            textAlign: TextAlign.center,
-                            style: ThemeText.priceTitle,
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            fullscreenDialog: true,
+                            builder: (context) => YouKassaPayment(
+                                product: availableProducts
+                                    .firstWhere((e) => e.id == 'adv_off'),
+                                onSuccess: () {
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
+                                  $gameVm.getNextLevel(context);
+                                }),
                           ),
-                        ),
-                      ],
+                        );
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Stack(
+                        children: [
+                          Image.asset(
+                            'assets/images/turn_off_add.png',
+                          ),
+                          Positioned(
+                            bottom: 16,
+                            left: 0,
+                            right: 0,
+                            child: Text(
+                              $paymentVM.productAdvOff?.price ?? '',
+                              textAlign: TextAlign.center,
+                              style: ThemeText.priceTitle,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 )
@@ -231,10 +237,10 @@ class AnimatedCounter extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _AnimatedCounterState createState() => _AnimatedCounterState();
+  AnimatedCounterState createState() => AnimatedCounterState();
 }
 
-class _AnimatedCounterState extends State<AnimatedCounter>
+class AnimatedCounterState extends State<AnimatedCounter>
     with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;

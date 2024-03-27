@@ -99,7 +99,7 @@ class _WrongAnswerDialogState extends State<WrongAnswerDialog> {
                         onTap: () {
                           $analytics.fireEvent(AnalyticsEvents.onShowAdvTap);
                           $gameVm.showAd(() {
-                            $gameVm.wrongAnswerCount = 0;
+                            $gameVm.wrongAnswerCount.value = 0;
                             Navigator.of(context).pop();
                           });
                         },

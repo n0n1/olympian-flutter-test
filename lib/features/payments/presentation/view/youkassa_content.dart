@@ -15,6 +15,8 @@ class YouKassaContent extends StatelessWidget with WatchItMixin {
   Widget build(BuildContext context) {
     $gameVm.fetchAdvSettings();
     final advSettings = watchValue<GameViewModel, bool>((p0) => p0.advSettings);
+    final levelIndex = watchValue<GameViewModel, int>((p0) => p0.levelIndex);
+
     return Padding(
       padding: const EdgeInsets.only(top: 40.0),
       child: DialogWrapper(
@@ -39,14 +41,71 @@ class YouKassaContent extends StatelessWidget with WatchItMixin {
                 children: [
                   ...availableProducts
                       .where((e) => e.id != 'adv_off')
-                      .map((e) => _buildProduct(context: context, product: e))
+                      .map(
+                        (e) => GestureDetector(
+                          onTap: () {
+                            final params = {
+                              'level_id': $gameVm.activeLevel.id,
+                              'level': levelIndex,
+                              'word': $gameVm.focusedWord?.word ?? '',
+                            };
+
+                            switch (e.coins) {
+                              case 100:
+                                $analytics.fireEventWithMap(
+                                    AnalyticsEvents.onBuy100, params);
+                                break;
+                              case 1000:
+                                $analytics.fireEventWithMap(
+                                    AnalyticsEvents.onBuy1000, params);
+                                break;
+                            }
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                fullscreenDialog: true,
+                                builder: (context) =>
+                                    YouKassaPayment(product: e),
+                              ),
+                            );
+                          },
+                          child: Stack(
+                            children: [
+                              Image.asset(
+                                'assets/images/shop_product_${e.coins}.png',
+                                width: 140,
+                              ),
+                              Positioned(
+                                bottom: 50,
+                                left: 0,
+                                right: 0,
+                                child: Text(
+                                  '+${availableInAppProducts[e.id]}',
+                                  textAlign: TextAlign.center,
+                                  style: ThemeText.priceCoinsTitleFill,
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 22,
+                                left: 0,
+                                right: 0,
+                                child: Text(
+                                  '₽${e.price}',
+                                  textAlign: TextAlign.center,
+                                  style: ThemeText.priceTitle,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
                       .toList(),
                   if (!advSettings)
                     GestureDetector(
                       onTap: () {
                         final params = {
                           'level_id': $gameVm.activeLevel.id,
-                          'level': $gameVm.fetchLevelIndex(),
+                          'level': levelIndex,
                           'word': $gameVm.focusedWord?.word ?? '',
                         };
 
@@ -86,62 +145,6 @@ class YouKassaContent extends StatelessWidget with WatchItMixin {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  _buildProduct({required BuildContext context, required ProductItem product}) {
-    return GestureDetector(
-      onTap: () {
-        final params = {
-          'level_id': $gameVm.activeLevel.id,
-          'level': $gameVm.fetchLevelIndex(),
-          'word': $gameVm.focusedWord?.word ?? '',
-        };
-
-        switch (product.coins) {
-          case 100:
-            $analytics.fireEventWithMap(AnalyticsEvents.onBuy100, params);
-            break;
-          case 1000:
-            $analytics.fireEventWithMap(AnalyticsEvents.onBuy1000, params);
-            break;
-        }
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            fullscreenDialog: true,
-            builder: (context) => YouKassaPayment(product: product),
-          ),
-        );
-      },
-      child: Stack(
-        children: [
-          Image.asset(
-            'assets/images/shop_product_${product.coins}.png',
-            width: 140,
-          ),
-          Positioned(
-            bottom: 50,
-            left: 0,
-            right: 0,
-            child: Text(
-              '+${availableInAppProducts[product.id]}',
-              textAlign: TextAlign.center,
-              style: ThemeText.priceCoinsTitleFill,
-            ),
-          ),
-          Positioned(
-            bottom: 22,
-            left: 0,
-            right: 0,
-            child: Text(
-              '₽${product.price}',
-              textAlign: TextAlign.center,
-              style: ThemeText.priceTitle,
-            ),
-          ),
-        ],
       ),
     );
   }

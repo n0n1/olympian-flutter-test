@@ -19,54 +19,60 @@ const int maxFailedLoadAttempts = 3;
 
 /// TODO: adservice
 
-class GameViewModel with ChangeNotifier {
-  List<LevelModel> _levels = [];
+class GameViewModel {
+  // Game Levels
+  List<LevelModel> levels = [];
+  late LevelModel activeLevel; // current level
+  final levelIndex = ValueNotifier<int>(0);
+  // index of last level
+  final lastActiveLevel = ValueNotifier<int>(-1);
 
-  List<LevelModel> get levels => _levels;
+  bool isFirstLevelComplete = false;
 
+  // Word groups
   List<List<WordModel>> groups = [];
-  late LevelModel activeLevel;
 
   WordModel? focusedWord;
   WordModel? scrollableWord;
   String lastGuessedWord = '';
-  int wrongAnswerCount = 0;
 
-  GlobalKey? scrollKey;
-
-  int coins = 0;
-  int coinsByRound = 0;
-
-  bool isFirstLevelComplete = false;
-
+  // Answer
+  final wrongAnswerCount = ValueNotifier<int>(0);
   //TODO: закомментированный код показа рекламы после 5 неверных попыток
   // bool get showWrongAnswerDialog => wrongAnswerCount >= maxWrongAnswerCount;
   bool get showWrongAnswerDialog => false;
 
+  GlobalKey? scrollKey;
+
+  /// Coins
+  // All coins in game
+  final coins = ValueNotifier<int>(0);
+  // By Round
+  final coinsByRound = ValueNotifier<int>(0);
+
+  final advSettings = ValueNotifier<bool>(false);
+
   init() async {
-    _levels = $DB.getLevels();
+    levels = $DB.getLevels();
 
     // Дефолтный уровень
-    activeLevel = _levels.first;
+    activeLevel = levels.first;
 
     /// Получение данных с бд
-    coins = $DB.getCoins();
-    wrongAnswerCount = $DB.getWrongAnswerCount();
+    coins.value = $DB.getCoins();
+    wrongAnswerCount.value = $DB.getWrongAnswerCount();
 
     // Если первый уровень не открыт
-    if (_levels.first.state == LevelState.disabled) {
-      _levels.first.state = LevelState.available;
+    if (levels.first.state == LevelState.disabled) {
+      levels.first.state = LevelState.available;
     }
-
-    notifyListeners();
 
     _cacheImages();
     _save();
-    // GetIt.I.signalReady(this);
   }
 
   // Проверяет пройден ли уровень
-  _isLevelComplete() {
+  bool _isLevelComplete() {
     final isComplete =
         activeLevel.data.where((e) => e.state != WordState.correct).isEmpty;
     if (isComplete) {
@@ -77,37 +83,40 @@ class GameViewModel with ChangeNotifier {
 
       activeLevel.state = LevelState.success;
       final lastCompleteLevel =
-          _levels.indexWhere((e) => e.id == activeLevel.id);
+          levels.indexWhere((e) => e.id == activeLevel.id);
 
       final nextOpenLevel = lastCompleteLevel + 1;
-      if (nextOpenLevel < _levels.length &&
-          _levels[nextOpenLevel].state != LevelState.success) {
-        _levels[nextOpenLevel].state = LevelState.available;
+      if (nextOpenLevel < levels.length &&
+          levels[nextOpenLevel].state != LevelState.success) {
+        levels[nextOpenLevel].state = LevelState.available;
         _cacheImages();
       }
     }
     return isComplete;
   }
 
-  play() {
+  // Запуск игры
+  void startPlayGame() {
     playTapAudio();
+    //
     fetchLastActiveLevelIndex();
-    final index = lastActiveLevel.value;
-
-    setActiveLevel(index == -1 ? _levels[0] : _levels[index]);
+    setActiveLevel(lastActiveLevel.value == -1
+        ? levels[0]
+        : levels[lastActiveLevel.value]);
   }
 
-  // index of last level
-  final lastActiveLevel = ValueNotifier<int>(0);
+  /// Levels BL
+
   void fetchLastActiveLevelIndex() {
-    lastActiveLevel.value = _levels.indexWhere((l) =>
+    lastActiveLevel.value = levels.indexWhere((l) =>
         (l.state == LevelState.available || l.state == LevelState.started));
   }
 
   // Добавляем активный уровень
   setActiveLevel(LevelModel level) {
     activeLevel = level;
-    coinsByRound = 0;
+    coinsByRound.value = 0;
+
     final maxDepth = activeLevel.data.map<int>((e) => e.depth).reduce(max);
     activeLevel.data = activeLevel.data.map((word) {
       if (word.state == WordState.correct) {
@@ -130,8 +139,6 @@ class GameViewModel with ChangeNotifier {
         .toList()
         .reversed
         .toList();
-
-    notifyListeners();
   }
 
   // Добавляет в след слово листочки
@@ -169,7 +176,7 @@ class GameViewModel with ChangeNotifier {
     final isCorrect = word.synonyms.any((element) => formatted == element);
 
     if (isCorrect) {
-      wrongAnswerCount = 0;
+      wrongAnswerCount.value = 0;
       word.state = WordState.correct;
       $audio.playRightAnswer();
 
@@ -185,8 +192,8 @@ class GameViewModel with ChangeNotifier {
       // Помечаем дочерний элемент
       _checkNextWordLeaf(word);
 
-      coins += $conf.appConfig.anyWordCoins;
-      coinsByRound += $conf.appConfig.anyWordCoins;
+      coins.value += $conf.appConfig.anyWordCoins;
+      coinsByRound.value += $conf.appConfig.anyWordCoins;
 
       // Добавляем монеты для не 1 уровня
       if (word.depth != 1) {
@@ -194,8 +201,8 @@ class GameViewModel with ChangeNotifier {
         final nextPairIndex = isEven ? wordIndex - 1 : wordIndex + 1;
         if (depthWords.asMap().containsKey(nextPairIndex)) {
           if (depthWords[nextPairIndex].state == WordState.correct) {
-            coins += $conf.appConfig.coupleOfWordsCoins;
-            coinsByRound += $conf.appConfig.coupleOfWordsCoins;
+            coins.value += $conf.appConfig.coupleOfWordsCoins;
+            coinsByRound.value += $conf.appConfig.coupleOfWordsCoins;
           }
         }
 
@@ -206,15 +213,15 @@ class GameViewModel with ChangeNotifier {
             depthWords.length;
 
         if (isRowComplete) {
-          coins += $conf.appConfig.entireColumnsCoins;
-          coinsByRound += $conf.appConfig.entireColumnsCoins;
+          coins.value += $conf.appConfig.entireColumnsCoins;
+          coinsByRound.value += $conf.appConfig.entireColumnsCoins;
         }
       }
 
       // Монеты если разгадал все
       if (_isLevelComplete()) {
-        coins += $conf.appConfig.finalWordOfTheLevelCoins;
-        coinsByRound += $conf.appConfig.finalWordOfTheLevelCoins;
+        coins.value += $conf.appConfig.finalWordOfTheLevelCoins;
+        coinsByRound.value += $conf.appConfig.finalWordOfTheLevelCoins;
 
         if (closeDialogOnComplete) {
           Navigator.of(ctx, rootNavigator: true).pop();
@@ -231,7 +238,7 @@ class GameViewModel with ChangeNotifier {
 
       _addWordLeaf(word, wordIndex);
     } else if (value != '') {
-      wrongAnswerCount += 1;
+      wrongAnswerCount.value += 1;
       $analytics.fireEventWithMap(AnalyticsEvents.onWordMistake, {
         'level_id': activeLevel.id,
         'level': fetchLevelIndex(),
@@ -282,7 +289,6 @@ class GameViewModel with ChangeNotifier {
     // _ad.turnOffAdd();
   }
 
-  final advSettings = ValueNotifier<bool>(false);
   void fetchAdvSettings() {
     advSettings.value = $DB.getAdvSetting();
   }
@@ -326,7 +332,6 @@ class GameViewModel with ChangeNotifier {
     } catch (e) {
       focusedWord = null;
     }
-    notifyListeners();
   }
 
   void showWrongAnswerModalDialog({
@@ -342,9 +347,8 @@ class GameViewModel with ChangeNotifier {
   }
 
   void buyPointsComplete(int newCoins) {
-    coins += newCoins;
+    coins.value += newCoins;
     _save();
-    notifyListeners();
   }
 
   void firePaymentComplete() {
@@ -361,7 +365,7 @@ class GameViewModel with ChangeNotifier {
   // Покупка подсказки за 25
   void buyPrompt(context) {
     /// Нет монет купи
-    if (coins < $conf.appConfig.randomHintCost) {
+    if (coins.value < $conf.appConfig.randomHintCost) {
       $analytics.fireEventWithMap(AnalyticsEvents.onMonetizationNoEnoughScore, {
         'level_id': activeLevel.id,
         'level': fetchLevelIndex(),
@@ -417,11 +421,11 @@ class GameViewModel with ChangeNotifier {
     _checkNextWordLeaf(randWord);
 
     // Списываем монеты
-    coins -= $conf.appConfig.randomHintCost;
+    coins.value -= $conf.appConfig.randomHintCost;
 
     scrollableWord = randWord;
 
-    wrongAnswerCount = 0;
+    wrongAnswerCount.value = 0;
 
     if (activeLevel.state == LevelState.available) {
       activeLevel.state = LevelState.started;
@@ -454,7 +458,6 @@ class GameViewModel with ChangeNotifier {
       'wordIndex': wordIndex,
     });
 
-    notifyListeners();
     _save();
   }
 
@@ -465,7 +468,7 @@ class GameViewModel with ChangeNotifier {
     }
 
     /// Нет монет купи
-    if (coins < $conf.appConfig.wordHintCost) {
+    if (coins.value < $conf.appConfig.wordHintCost) {
       showDialog(
         context: context,
         barrierColor: Colors.black38,
@@ -494,7 +497,7 @@ class GameViewModel with ChangeNotifier {
     final wordIndex = activeLevel.data.indexOf(focusedWord!);
     _addWordLeaf(activeLevel.data[wordIndex], wordIndex + 1);
 
-    coins -= $conf.appConfig.wordHintCost;
+    coins.value -= $conf.appConfig.wordHintCost;
 
     if (focusedWord!.image != '' || focusedWord!.description != '') {
       Navigator.pop(context, false);
@@ -524,7 +527,7 @@ class GameViewModel with ChangeNotifier {
       );
     }
 
-    wrongAnswerCount = 0;
+    wrongAnswerCount.value = 0;
 
     if (_isLevelComplete()) {
       showDialog(
@@ -537,15 +540,13 @@ class GameViewModel with ChangeNotifier {
     } else {
       clearActiveWord();
     }
-    notifyListeners();
   }
 
   // Подсказка за 50
   void buyAttempt() {
-    coins -= 10;
-    wrongAnswerCount = 0;
+    coins.value -= 10;
+    wrongAnswerCount.value = 0;
     _save();
-    notifyListeners();
   }
 
   Future<bool> canShowAd() async {
@@ -575,12 +576,11 @@ class GameViewModel with ChangeNotifier {
 
   clearActiveWord() {
     focusedWord = null;
-    notifyListeners();
   }
 
   getNextLevel(BuildContext context) {
     var index =
-        _levels.indexWhere((element) => element.state != LevelState.success);
+        levels.indexWhere((element) => element.state != LevelState.success);
     if (index == -1) {
       showDialog(
         context: context,
@@ -589,30 +589,26 @@ class GameViewModel with ChangeNotifier {
       );
       return;
     }
-    setActiveLevel(_levels[index]);
+    setActiveLevel(levels[index]);
 
     scrollableWord = groups.first[0];
-    notifyListeners();
+
     _save();
   }
 
   setScrollableWord(WordModel word) {
     scrollableWord = word;
-    notifyListeners();
   }
 
   scrollToWidget() {
     if (scrollKey?.currentContext != null) {
       Scrollable.ensureVisible(scrollKey!.currentContext!);
       scrollableWord = null;
-      notifyListeners();
     }
   }
 
-  final levelIndex = ValueNotifier<int>(0);
-
   int fetchLevelIndex() {
-    levelIndex.value = _levels.indexWhere((e) => e.id == activeLevel.id) + 1;
+    levelIndex.value = levels.indexWhere((e) => e.id == activeLevel.id) + 1;
     return levelIndex.value;
   }
 
@@ -622,8 +618,6 @@ class GameViewModel with ChangeNotifier {
         .length;
   }
 
-  getCoinsByRound() => coinsByRound;
-
   /// Play audio on tap
   void playTapAudio() {
     $audio.playTap();
@@ -631,12 +625,12 @@ class GameViewModel with ChangeNotifier {
 
   _save() {
     /// Сохранение
-    for (var level in _levels) {
+    for (var level in levels) {
       $DB.saveLevel(level);
     }
     $DB.saveLevel(activeLevel);
-    $DB.saveCoins(coins);
-    $DB.saveWrongAnswerCount(wrongAnswerCount);
+    $DB.saveCoins(coins.value);
+    $DB.saveWrongAnswerCount(wrongAnswerCount.value);
 
     OneSignal.User.addTags({
       NotificationDataKeys.notificationActiveLevel: activeLevel.id,
@@ -647,7 +641,7 @@ class GameViewModel with ChangeNotifier {
 
   _cacheImages() {
     for (final lvl
-        in _levels.where((element) => element.state == LevelState.available)) {
+        in levels.where((element) => element.state == LevelState.available)) {
       final wordsWithImage =
           lvl.data.where((element) => element.image.isNotEmpty);
       for (final word in wordsWithImage) {
@@ -656,7 +650,7 @@ class GameViewModel with ChangeNotifier {
     }
   }
 
-  isLastWord() {
+  bool isLastWord() {
     return activeLevel.data
             .where((elm) =>
                 elm.state == WordState.idle || elm.state == WordState.input)
@@ -674,10 +668,10 @@ class GameViewModel with ChangeNotifier {
         getAllDoneWords() == activeLevel.data.length - 1;
   }
 
-  updateCoins(int addCoins) {
+  /// Добавление монеток
+  addCoins(int addCoins) {
     final newCoins = $DB.getCoins() + addCoins;
-    $DB.saveCoins(newCoins);
-    coins = newCoins;
-    notifyListeners();
+    coins.value = newCoins;
+    $DB.saveCoins(coins.value);
   }
 }

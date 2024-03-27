@@ -80,7 +80,7 @@ class PlayButton extends StatelessWidget {
         padding: const EdgeInsets.only(right: 40),
         child: ImageButton(
           onTap: () {
-            $gameVm.play();
+            $gameVm.startPlayGame();
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const LevelsScreen()),
@@ -149,10 +149,9 @@ class NextLevelView extends StatelessWidget with WatchItMixin {
 
   @override
   Widget build(BuildContext context) {
-    $gameVm.fetchLastActiveLevelIndex();
     final lastActiveLevel =
         watchValue<GameViewModel, int>((vm) => vm.lastActiveLevel);
-
+    $gameVm.fetchLastActiveLevelIndex();
     return Center(
       child: Text(
         'Продолжить: ${lastActiveLevel + 1} уровень',

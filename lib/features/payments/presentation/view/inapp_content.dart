@@ -16,7 +16,10 @@ class InAppContent extends StatelessWidget with WatchItMixin {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       await $paymentVM.loadProducts();
     });
+
     final advSettings = watchValue<GameViewModel, bool>((p0) => p0.advSettings);
+    final levelIndex = watchValue<GameViewModel, int>((p0) => p0.levelIndex);
+
     return Padding(
       padding: const EdgeInsets.only(top: 40.0),
       child: DialogWrapper(
@@ -71,7 +74,7 @@ class InAppContent extends StatelessWidget with WatchItMixin {
 
                           final params = {
                             'level_id': $gameVm.activeLevel.id,
-                            'level': $gameVm.fetchLevelIndex(),
+                            'level': levelIndex,
                             'word': $gameVm.focusedWord?.word ?? '',
                           };
 
@@ -138,7 +141,7 @@ class InAppContent extends StatelessWidget with WatchItMixin {
 
                           final params = {
                             'level_id': ctrl.activeLevel.id,
-                            'level': ctrl.fetchLevelIndex(),
+                            'level': levelIndex,
                             'word': ctrl.focusedWord?.word ?? '',
                           };
                           $analytics.fireEventWithMap(
